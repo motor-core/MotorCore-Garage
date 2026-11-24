@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              x:Class="MotorCore_Garage.Pages.ClienteVehiculosPage"
              Style="{StaticResource Pagina}"
              NavigationPage.HasNavigationBar="False">
 
     <ScrollView>
         <VerticalStackLayout Spacing="0">
-            <VerticalStackLayout BackgroundColor="{StaticResource Graphite}" Padding="24,64,24,28" Spacing="6">
-                <Label Text="Mis vehículos" FontFamily="OpenSansSemibold" FontSize="26" TextColor="{StaticResource White}" />
-                <Label Text="Toca un vehículo para ver su historial" FontSize="15" TextColor="#C9CDD1" />
+            <VerticalStackLayout Style="{StaticResource Hero}">
+                <Label Text="Mis vehículos" Style="{StaticResource HeroTitulo}" />
+                <Label Text="Toca un vehículo para ver su historial" Style="{StaticResource HeroSubtitulo}" />
             </VerticalStackLayout>
 
             <VerticalStackLayout Padding="16,20,16,32" Spacing="12">
+                <Button Text="Registrar mi vehículo" Style="{StaticResource BotonSecundario}" Clicked="OnRegistrar"
+                        ImageSource="{mi:Material Icon=DirectionsCar, IconColor=#E8701A, IconSize=20}" />
                 <VerticalStackLayout x:Name="Lista" Spacing="12" />
                 <Label x:Name="Vacio" Text="Cuando el taller registre tu vehículo, aparecerá aquí."
-                       Style="{StaticResource Pie}" HorizontalTextAlignment="Center" IsVisible="False" />
+                       Style="{StaticResource EstadoVacio}" IsVisible="False" />
             </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>

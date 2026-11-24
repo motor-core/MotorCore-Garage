@@ -41,7 +41,7 @@ namespace MotorCore_Garage.Services
         public static void Cargar()
         {
             var db = Db.Conexion;
-            Catalogo.Clear(); Clientes.Clear(); Vehiculos.Clear(); Citas.Clear(); Servicios.Clear(); Bitacora.Clear();
+            Catalogo.Clear(); Clientes.Clear(); Vehiculos.Clear(); Citas.Clear(); Servicios.Clear(); Bitacora.Clear(); Mantenimientos.Clear();
 
             Catalogo.AddRange(db.Table<ComponenteDef>().OrderBy(c => c.Id).ToList());
             Clientes.AddRange(db.Table<Cliente>().OrderBy(c => c.Id).ToList());
@@ -52,6 +52,7 @@ namespace MotorCore_Garage.Services
                 foreach (var u in ultimos.Where(u => u.VehiculoId == v.Id))
                     v.UltimoServicioKm[u.Componente] = u.KmUltimo;
 
+            Mantenimientos.AddRange(db.Table<Mantenimiento>().OrderBy(m => m.Id).ToList());
             Citas.AddRange(db.Table<Cita>().OrderBy(c => c.Fecha).ToList());
             Servicios.AddRange(db.Table<RegistroServicio>().OrderByDescending(s => s.Fecha).ToList());
             Bitacora.AddRange(db.Table<EntradaBitacora>().OrderByDescending(b => b.Id).Take(200).ToList());
@@ -80,16 +81,48 @@ namespace MotorCore_Garage.Services
             });
             NombreTaller = nombreTaller;
             Iniciar(usuario.ToLowerInvariant(), Rol.Administrador);
+            ClaveSesion = clave;
             Bitacorar("Taller registrado · cuenta de administrador creada");
             return null;
         }
 
-        public static string? Autenticar(string usuario, string clave)
+        // Contraseña del monitor en esta sesión. Solo vive en memoria: hace falta para volver a entrar como admin
+        // después de crear un mecánico en Firebase, y se borra al cerrar sesión.
+        public static string? ClaveSesion { get; private set; }
+
+        // Monitoreo: primero Firebase (con el rol de Firestore). Si no hay conexión o la cuenta no está en Firebase,
+        // se usa la cuenta guardada en este teléfono.
+        public static async Task<string?> AutenticarMonitorAsync(string usuario, string clave)
+        {
+            if (await FirebaseSesion.EntrarAsync(usuario, clave))
+            {
+                var rol = await FirebaseSesion.RolAsync();
+                if (rol is "admin" or "mecanico")
+                {
+                    Iniciar(usuario.Trim().ToLowerInvariant(), rol == "admin" ? Rol.Administrador : Rol.Mecanico);
+                    ClaveSesion = clave;
+                    Bitacorar("inició sesión (Firebase)");
+                    return null;
+                }
+                await FirebaseSesion.SalirAsync();
+            }
+
+            var error = Autenticar(usuario, clave, esCliente: false);
+            if (error is null) ClaveSesion = clave;
+            return error;
+        }
+
+        // esCliente indica el tipo que eligió el usuario en la pantalla de entrada; debe coincidir con la cuenta.
+        public static string? Autenticar(string usuario, string clave, bool esCliente)
         {
             var nombre = usuario.Trim().ToLowerInvariant();
             var cuenta = Db.Conexion.Table<Usuario>().FirstOrDefault(u => u.Username == nombre);
             if (cuenta is null || !Seguridad.Verificar(clave, cuenta.PasswordHash))
                 return "Usuario o contraseña incorrectos";
+            if ((cuenta.Rol == Rol.Cliente) != esCliente)
+                return esCliente
+                    ? "Esta cuenta es de monitoreo. Cambia a «Monitor» para entrar"
+                    : "Esta cuenta es de cliente. Cambia a «Cliente» para entrar";
             Iniciar(cuenta.Username, cuenta.Rol, cuenta.ClienteId);
             Bitacorar("inició sesión");
             return null;
@@ -100,6 +133,8 @@ namespace MotorCore_Garage.Services
             Bitacorar("cerró sesión");
             UsuarioActual = "";
             ClienteActualId = 0;
+            ClaveSesion = null;
+            _ = FirebaseSesion.SalirAsync();
         }
 
         static void Iniciar(string usuario, Rol rol, int clienteId = 0)
@@ -131,6 +166,104 @@ namespace MotorCore_Garage.Services
             });
             Bitacorar($"creó la cuenta de acceso «{nombre}» para {ClientePorId(clienteId)!.Nombre}");
             return null;
+        }
+
+        // Cuentas del taller (administrador y mecánicos). Las cuentas de cliente se gestionan desde su ficha.
+        public static List<Usuario> CuentasDelTaller() =>
+            Db.Conexion.Table<Usuario>().ToList()
+                .Where(u => u.Rol != Rol.Cliente)
+                .OrderBy(u => u.Rol)
+                .ThenBy(u => u.Username)
+                .ToList();
+
+        // Crea el mecánico en este teléfono y, si hay conexión, también en Firebase.
+        // Si Firebase falla, la cuenta queda solo local y se anota en la bitácora.
+        public static async Task<string?> CrearCuentaMecanicoAsync(string usuario, string clave)
+        {
+            var nombre = usuario.Trim().ToLowerInvariant();
+            if (nombre.Length < 3) return "El usuario debe tener al menos 3 caracteres";
+            if (clave.Length < 6) return "La contraseña debe tener al menos 6 caracteres";
+            if (Db.Conexion.Table<Usuario>().Any(u => u.Username == nombre)) return "Ese usuario ya existe";
+
+            Db.Conexion.Insert(new Usuario
+            {
+                Username = nombre,
+                PasswordHash = Seguridad.Generar(clave),
+                Rol = Rol.Mecanico
+            });
+            Bitacorar($"creó la cuenta de mecánico «{nombre}»");
+
+            if (ClaveSesion is null
+                || !await FirebaseSesion.CrearMecanicoAsync(nombre, clave, UsuarioActual, ClaveSesion))
+                Bitacorar($"«{nombre}» quedó solo en este teléfono (sin conexión a Firebase)");
+            return null;
+        }
+
+        // Solo se pueden eliminar cuentas de mecánico; el administrador no puede borrarse a sí mismo.
+        public static string? EliminarCuentaMecanico(Usuario cuenta)
+        {
+            if (cuenta.Rol != Rol.Mecanico) return "Solo se pueden eliminar cuentas de mecánico";
+            Db.Conexion.Delete<Usuario>(cuenta.Id);
+            Bitacorar($"eliminó la cuenta de mecánico «{cuenta.Username}»");
+            return null;
+        }
+
+        // ---------- Mantenimientos del cliente ----------
+
+        public static List<Mantenimiento> Mantenimientos { get; } = new();
+
+        public static IEnumerable<Mantenimiento> MantenimientosDeVehiculo(int vehiculoId) =>
+            Mantenimientos.Where(m => m.VehiculoId == vehiculoId);
+
+        // Vence por kilómetros (si tiene intervalo en km) o por tiempo (si tiene meses). Lo que llegue primero manda.
+        public static EstadoMantenimiento EstadoDe(Mantenimiento m, Vehiculo v)
+        {
+            int? kmRestantes = m.IntervaloKm > 0 ? m.KmUltimo + m.IntervaloKm - v.KmActual : null;
+            DateTime? fechaVence = m.IntervaloMeses > 0 ? m.FechaUltima.AddMonths(m.IntervaloMeses) : null;
+
+            var vencido = kmRestantes is <= 0 || fechaVence is { } fv && fv.Date <= DateTime.Today;
+            var proximo = kmRestantes is { } kr && kr <= UmbralProximo || fechaVence is { } fp && fp.Date <= DateTime.Today.AddDays(30);
+
+            var estado = vencido ? Desgaste.Vencido : proximo ? Desgaste.Proximo : Desgaste.Ok;
+            return new EstadoMantenimiento(m, kmRestantes ?? 0, fechaVence, estado);
+        }
+
+        // Pendientes (próximos o vencidos) de todos los vehículos de un cliente.
+        public static List<EstadoMantenimiento> PendientesDeCliente(int clienteId) =>
+            Vehiculos.Where(v => v.ClienteId == clienteId)
+                .SelectMany(v => MantenimientosDeVehiculo(v.Id).Select(m => EstadoDe(m, v)))
+                .Where(e => e.Estado != Desgaste.Ok)
+                .OrderByDescending(e => e.Estado)
+                .ToList();
+
+        public static void AgregarMantenimiento(Mantenimiento m)
+        {
+            Db.Conexion.Insert(m);
+            Mantenimientos.Add(m);
+            Bitacorar($"programó «{m.Nombre}» para el vehículo {VehiculoPorId(m.VehiculoId)?.Placa}");
+        }
+
+        // Registra que el mantenimiento se hizo: reinicia el periodo desde ese kilometraje y fecha.
+        public static void MarcarRealizado(Mantenimiento m, int km)
+        {
+            var vehiculo = VehiculoPorId(m.VehiculoId)!;
+            m.KmUltimo = Math.Max(km, vehiculo.KmActual);
+            m.FechaUltima = DateTime.Today;
+            m.UltimoAviso = DateTime.MinValue;
+            if (km > vehiculo.KmActual)
+            {
+                vehiculo.KmActual = km;
+                Db.Conexion.Update(vehiculo);
+            }
+            Db.Conexion.Update(m);
+            Bitacorar($"registró «{m.Nombre}» realizado en {vehiculo.Placa} ({km:N0} km)");
+        }
+
+        public static void EliminarMantenimiento(Mantenimiento m)
+        {
+            Db.Conexion.Delete(m);
+            Mantenimientos.Remove(m);
+            Bitacorar($"eliminó «{m.Nombre}»");
         }
 
         // ---------- Escritura (cada método guarda en SQLite y actualiza la memoria) ----------

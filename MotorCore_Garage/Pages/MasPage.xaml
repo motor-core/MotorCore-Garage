@@ -1,37 +1,49 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              x:Class="MotorCore_Garage.Pages.MasPage"
              Title="Más"
              Style="{StaticResource Pagina}">
 
-    <Grid RowDefinitions="Auto,*">
+    <ScrollView>
+        <VerticalStackLayout Spacing="0">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="16,44,16,12" ColumnDefinitions="*,Auto">
-            <Label Text="Más y ajustes" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
-            <Border Grid.Column="1" BackgroundColor="{StaticResource Card}" Style="{StaticResource Chip}" VerticalOptions="Center">
-                <Label Text="☁ Modo local" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource Ink}" />
-            </Border>
-        </Grid>
-
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="16,16,16,96" Spacing="16">
-
-                <!-- Perfil -->
-                <Border Style="{StaticResource Tarjeta}">
-                    <VerticalStackLayout Spacing="2">
-                        <Label x:Name="Usuario" Style="{StaticResource Seccion}" />
-                        <Label x:Name="Rol" Style="{StaticResource Pie}" FontSize="14" />
-                    </VerticalStackLayout>
+            <!-- Perfil de la sesión actual -->
+            <Grid Style="{StaticResource Hero}" ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <!-- Avatar del usuario: círculo naranja con el icono de cuenta -->
+                <Border BackgroundColor="{StaticResource Primary}" WidthRequest="44" HeightRequest="44"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 22" VerticalOptions="Center">
+                    <Image Source="{mi:Material Icon=AccountCircle, IconColor=White, IconSize=28}"
+                           WidthRequest="28" HeightRequest="28" HorizontalOptions="Center" VerticalOptions="Center" />
                 </Border>
+                <!-- CharacterWrap: un nombre largo baja de línea en vez de cortarse -->
+                <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                    <Label x:Name="Usuario" Style="{StaticResource HeroTitulo}" FontSize="24" LineBreakMode="CharacterWrap" />
+                    <Label x:Name="Rol" Style="{StaticResource HeroSubtitulo}" />
+                </VerticalStackLayout>
+            </Grid>
+
+            <VerticalStackLayout Padding="16,20,16,96" Spacing="16">
 
                 <!-- Accesos -->
                 <Border Style="{StaticResource Tarjeta}" Padding="0">
                     <VerticalStackLayout>
-                        <Button Text="Clientes" Style="{StaticResource BotonSecundario}" BorderWidth="0" Clicked="OnClientes" />
-                        <Button x:Name="BotonReportes" Text="Reportes y métricas" Style="{StaticResource BotonSecundario}" BorderWidth="0" Clicked="OnReportes" />
+                        <Button Text="Clientes" ImageSource="{mi:Material Icon=PeopleAlt, IconColor=#E8701A, IconSize=20}" Style="{StaticResource BotonSecundario}" BorderWidth="0" Clicked="OnClientes" />
+                        <Button x:Name="BotonReportes" Text="Reportes y métricas" ImageSource="{mi:Material Icon=Analytics, IconColor=#E8701A, IconSize=20}" Style="{StaticResource BotonSecundario}" BorderWidth="0" Clicked="OnReportes" />
                     </VerticalStackLayout>
                 </Border>
+
+                <!-- Equipo: cuentas del taller -->
+                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                    <Label Text="Equipo" Style="{StaticResource Seccion}" VerticalOptions="Center" />
+                    <Button x:Name="BotonMecanico" Grid.Column="1" Text="Agregar mecánico" ImageSource="{mi:Material Icon=PersonAdd, IconColor=#E8701A, IconSize=20}" Style="{StaticResource BotonSecundario}"
+                            HeightRequest="44" FontSize="14" Padding="12,0" Clicked="OnAgregarMecanico" />
+                </Grid>
+                <Border Style="{StaticResource Tarjeta}" Padding="0">
+                    <VerticalStackLayout x:Name="Equipo" />
+                </Border>
+                <Label x:Name="AyudaEquipo" Style="{StaticResource Pie}" />
 
                 <!-- Bahías -->
                 <Label Text="Taller" Style="{StaticResource Seccion}" />
@@ -41,7 +53,11 @@
                             <Label Text="Número de bahías" Style="{StaticResource CuerpoStrong}" />
                             <Label x:Name="TextoBahias" Style="{StaticResource Pie}" />
                         </VerticalStackLayout>
-                        <Stepper Grid.Column="1" x:Name="Bahias" Minimum="1" Maximum="10" Increment="1" ValueChanged="OnBahias" />
+                        <HorizontalStackLayout Grid.Column="1" Spacing="10" VerticalOptions="Center">
+                            <Button x:Name="BotonMenosBahias" Text="−" WidthRequest="48" HeightRequest="48" CornerRadius="24" Padding="0" FontSize="24" FontFamily="NotoSansSemibold" Clicked="OnMenosBahias" />
+                            <Label x:Name="ValorBahias" FontSize="20" FontFamily="NotoSansSemibold" MinimumWidthRequest="32" HorizontalTextAlignment="Center" VerticalOptions="Center" />
+                            <Button x:Name="BotonMasBahias" Text="+" WidthRequest="48" HeightRequest="48" CornerRadius="24" Padding="0" FontSize="24" FontFamily="NotoSansSemibold" Clicked="OnMasBahias" />
+                        </HorizontalStackLayout>
                     </Grid>
                 </Border>
 
@@ -51,25 +67,16 @@
                     <VerticalStackLayout x:Name="Catalogo" Spacing="12" />
                 </Border>
 
-                <!-- Usuarios -->
-                <Label x:Name="TituloUsuarios" Text="Usuarios" Style="{StaticResource Seccion}" />
-                <Border x:Name="PanelUsuarios" Style="{StaticResource Tarjeta}">
-                    <VerticalStackLayout Spacing="6">
-                        <Label Text="admin · Administrador" Style="{StaticResource Cuerpo}" />
-                        <Label Text="mecanico · Mecánico" Style="{StaticResource Cuerpo}" />
-                    </VerticalStackLayout>
-                </Border>
-
-                <!-- Respaldo y sesión -->
+                <!-- Datos y sesión -->
                 <Label Text="Datos" Style="{StaticResource Seccion}" />
                 <Border Style="{StaticResource Tarjeta}" Padding="0">
                     <VerticalStackLayout>
-                        <Button Text="Respaldar base de datos local" Style="{StaticResource BotonSecundario}" BorderWidth="0" Clicked="OnRespaldo" />
-                        <Button Text="Cerrar sesión" Style="{StaticResource BotonSecundario}" BorderWidth="0"
+                        <Button Text="Respaldar base de datos local" ImageSource="{mi:Material Icon=Backup, IconColor=#E8701A, IconSize=20}" Style="{StaticResource BotonSecundario}" BorderWidth="0" Clicked="OnRespaldo" />
+                        <Button Text="Cerrar sesión" ImageSource="{mi:Material Icon=Logout, IconColor=#C62828, IconSize=20}" Style="{StaticResource BotonSecundario}" BorderWidth="0"
                                 TextColor="{StaticResource WearDue}" Clicked="OnCerrarSesion" />
                     </VerticalStackLayout>
                 </Border>
-            </VerticalStackLayout>
-        </ScrollView>
-    </Grid>
+                </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

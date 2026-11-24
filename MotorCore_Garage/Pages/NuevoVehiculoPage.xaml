@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              x:Class="MotorCore_Garage.Pages.NuevoVehiculoPage"
              Title="Nuevo vehículo"
              Style="{StaticResource Pagina}">
 
     <Grid RowDefinitions="Auto,*">
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="8,44,16,12" ColumnDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource BarraVolver}" ColumnDefinitions="Auto,*">
             <Button Text="‹" FontSize="24" BackgroundColor="Transparent" TextColor="{StaticResource White}"
                     WidthRequest="48" HeightRequest="48" Padding="0" Clicked="OnVolver" />
-            <Label Grid.Column="1" Text="Nuevo vehículo" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="Nuevo vehículo" Style="{StaticResource CabeceraTitulo}" />
         </Grid>
 
         <ScrollView Grid.Row="1">
@@ -49,7 +50,7 @@
                        Style="{StaticResource Pie}" />
 
                 <Label x:Name="Error" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
-                <Button Text="Guardar vehículo" Style="{StaticResource BotonPrimario}" Clicked="OnGuardar" />
+                <Button Text="Guardar vehículo" ImageSource="{mi:Material Icon=Save, IconColor=White, IconSize=20}" Style="{StaticResource BotonPrimario}" Clicked="OnGuardar" />
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

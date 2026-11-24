@@ -7,14 +7,12 @@
 
     <Grid RowDefinitions="Auto,Auto,*">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="16,44,16,12" ColumnDefinitions="*,Auto">
-            <Label Text="Vehículos" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
-            <Border Grid.Column="1" BackgroundColor="{StaticResource Card}" Style="{StaticResource Chip}" VerticalOptions="Center">
-                <Label Text="☁ Modo local" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource Ink}" />
-            </Border>
-        </Grid>
+        <VerticalStackLayout Grid.Row="0" Style="{StaticResource Hero}">
+            <Label Text="Vehículos" Style="{StaticResource HeroTitulo}" />
+            <Label Text="Estado de desgaste de cada unidad" Style="{StaticResource HeroSubtitulo}" />
+        </VerticalStackLayout>
 
-        <VerticalStackLayout Grid.Row="1" Padding="16,12,16,0" Spacing="10">
+        <VerticalStackLayout Grid.Row="1" Padding="16,16,16,0" Spacing="10">
             <Border Style="{StaticResource Tarjeta}" Padding="12,4">
                 <Entry x:Name="Buscar" Placeholder="Buscar por placa o modelo" FontSize="16"
                        TextChanged="OnFiltrar" ClearButtonVisibility="WhileEditing" />

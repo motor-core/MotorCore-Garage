@@ -56,7 +56,7 @@ La navegación principal está en la barra de pestañas inferior.
 
 ### Alertas y reportes
 - Alertas agrupadas en vencidas, próximas y programadas (cuando ya hay una cita para ese vehículo).
-- **Más:** configuración de bahías, intervalos del catálogo de componentes, bitácora, respaldo en JSON y cierre de sesión. Los reportes son para administradores.
+- **Más:** equipo del taller (alta y baja de cuentas de mecánico), configuración de bahías, intervalos del catálogo de componentes, respaldo en JSON y cierre de sesión. Los reportes son para administradores.
 
 ---
 
@@ -68,10 +68,10 @@ La navegación principal está en la barra de pestañas inferior.
 | Lenguaje | C# (nullable habilitado, implicit usings) |
 | UI | XAML con compilación en tiempo de build (`MauiXamlInflator=SourceGen`) |
 | Navegación | Shell (`TabBar` + rutas registradas en `AppShell.xaml.cs`) |
-| Base de datos | SQLite local con [sqlite-net-pcl](https://github.com/praeclarum/sqlite-net) y `SQLitePCLRaw.bundle_e_sqlite3` |
+| Base de datos | SQLite local (sin conexión) y Firebase (Auth y Firestore) con [sqlite-net-pcl](https://github.com/praeclarum/sqlite-net) y `SQLitePCLRaw.bundle_e_sqlite3` |
 | Seguridad | PBKDF2-SHA256 para contraseñas (`System.Security.Cryptography`) |
 | Tipografía | Open Sans (Regular y Semibold) |
-| Plataformas | Android (API 21+), iOS y Mac Catalyst (15.0+), Windows (10.0.17763+) |
+| Plataformas | Android (API 23+), iOS y Mac Catalyst (15.0+), Windows (10.0.17763+) |
 
 ---
 
@@ -242,9 +242,12 @@ Los estilos respetan el modo claro y oscuro del sistema mediante `AppThemeBindin
 
 | Clave | Uso |
 |---|---|
-| `Display`, `Titulo`, `Seccion` | Encabezados |
+| `Hero`, `HeroTitulo`, `HeroSubtitulo` | Cabecera de cada pestaña (monitoreo y cliente) |
+| `BarraVolver`, `CabeceraTitulo` | Cabecera de pantallas secundarias, con botón ‹ |
+| `Display`, `Titulo`, `Seccion` | Encabezados dentro del contenido |
 | `CuerpoStrong`, `Cuerpo`, `Pie`, `Etiqueta` | Texto de cuerpo, secundario y etiquetas |
 | `Tarjeta`, `Chip`, `Campo` | Contenedores y campos de formulario |
+| `EstadoVacio` | Mensaje cuando una lista no tiene elementos |
 | `BotonPrimario`, `BotonSecundario` | Botones de acción |
 | `Pagina` | Fondo y barra de navegación de cada página |
 
@@ -262,9 +265,10 @@ Los estilos respetan el modo claro y oscuro del sistema mediante `AppThemeBindin
 - [x] Configuración de bahías e intervalos, bitácora y cierre de sesión.
 - [x] Sistema de estilos con soporte de modo claro y oscuro.
 - [x] Compilación para Android verificada.
+- [x] Alta y eliminación de cuentas de mecánico desde *Más → Equipo* (solo administrador).
+- [x] Cabecera unificada en todas las pantallas y estados vacíos en las listas.
 
 ### Pendiente
-- [ ] Alta y gestión de cuentas de mecánicos (hoy solo existe el administrador inicial).
 - [ ] Probar el flujo completo en dispositivo (registro, login, cliente, vehículo, servicio).
 - [ ] Respaldo y restauración de la base de datos (hoy el respaldo es un JSON de lectura).
 - [ ] Mantener la cabecera visible cuando se abre el teclado en formularios.

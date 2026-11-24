@@ -15,7 +15,7 @@ namespace MotorCore_Garage.Services
             {
                 Text = icono is null ? texto : $"{icono} {texto}",
                 TextColor = letra,
-                FontFamily = "OpenSansSemibold",
+                FontFamily = "NotoSansSemibold",
                 FontSize = 12,
                 VerticalOptions = LayoutOptions.Center
             };
@@ -54,6 +54,15 @@ namespace MotorCore_Garage.Services
             Prioridad.Prioritaria => Chip("Prioritaria", Recurso("WearSoon"), Recurso("Ink"), "◷"),
             _ => Chip("Normal", Recurso("Outline"), Recurso("Ink"))
         };
+
+        // Botón de selección (p. ej. Monitor / Cliente): activo con relleno naranja, inactivo con contorno.
+        public static void EstiloSeleccion(Button boton, bool activo)
+        {
+            boton.BackgroundColor = activo ? Recurso("Primary") : Colors.Transparent;
+            boton.TextColor = activo ? Recurso("White") : Recurso("Primary");
+            boton.BorderColor = Recurso("Primary");
+            boton.BorderWidth = activo ? 0 : 1;
+        }
 
         // Muestra un mensaje breve en la parte inferior de la pantalla (snackbar).
         public static async Task Snackbar(Border barra, Label texto, string mensaje, int milisegundos = 2500)

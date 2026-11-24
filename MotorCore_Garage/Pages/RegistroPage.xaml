@@ -8,18 +8,36 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <VerticalStackLayout BackgroundColor="{StaticResource Graphite}" Padding="24,72,24,44" Spacing="6">
+            <VerticalStackLayout Style="{StaticResource Hero}" Padding="24,56,24,24">
                 <GraphicsView x:Name="Logo" HeightRequest="64" WidthRequest="64" HorizontalOptions="Start" Margin="0,0,0,12" />
-                <Label Text="Registra tu taller" FontFamily="OpenSansSemibold" FontSize="26" TextColor="{StaticResource White}" />
-                <Label Text="Primer uso: crea la cuenta de administrador" FontSize="15" TextColor="#C9CDD1" />
+                <Label x:Name="Titulo" Style="{StaticResource HeroTitulo}" />
+                <Label x:Name="Subtitulo" Style="{StaticResource HeroSubtitulo}" />
             </VerticalStackLayout>
 
             <Border Style="{StaticResource Tarjeta}" Margin="16,20,16,24" Padding="20">
                 <VerticalStackLayout Spacing="12">
-                    <Label Text="Nombre del taller" Style="{StaticResource Etiqueta}" />
-                    <Entry x:Name="NombreTaller" Style="{StaticResource Campo}" Placeholder="Ej. Taller Ramírez" ReturnType="Next" />
 
-                    <Label Text="Usuario del administrador" Style="{StaticResource Etiqueta}" />
+                    <!-- Tipo de cuenta: taller (monitoreo) o cliente -->
+                    <Label Text="Tipo de cuenta" Style="{StaticResource Etiqueta}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button x:Name="BotonModoMonitor" Text="Monitor" HeightRequest="48" FontSize="14" Clicked="OnModoMonitor" />
+                        <Button x:Name="BotonModoCliente" Grid.Column="1" Text="Cliente" HeightRequest="48" FontSize="14" Clicked="OnModoCliente" />
+                    </Grid>
+                    <Label x:Name="AyudaModo" Style="{StaticResource Pie}" />
+
+                    <!-- Monitor: datos del taller -->
+                    <VerticalStackLayout x:Name="CampoTaller" Spacing="12">
+                        <Label Text="Nombre del taller" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="NombreTaller" Style="{StaticResource Campo}" Placeholder="Ej. Taller Ramírez" ReturnType="Next" />
+                    </VerticalStackLayout>
+
+                    <!-- Cliente: el taller debe haberte dado de alta antes -->
+                    <VerticalStackLayout x:Name="CampoCliente" Spacing="12" IsVisible="False">
+                        <Label Text="Tu nombre en el taller" Style="{StaticResource Etiqueta}" />
+                        <Picker x:Name="ClienteLista" Title="Elige tu nombre" FontSize="16" HeightRequest="56" />
+                    </VerticalStackLayout>
+
+                    <Label Text="Usuario" Style="{StaticResource Etiqueta}" />
                     <Entry x:Name="UsuarioNuevo" Style="{StaticResource Campo}" Placeholder="Ej. admin" ReturnType="Next" />
 
                     <Label Text="Contraseña (mínimo 6 caracteres)" Style="{StaticResource Etiqueta}" />
@@ -36,7 +54,8 @@
 
                     <Label x:Name="Error" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
 
-                    <Button Text="Crear taller y entrar" Style="{StaticResource BotonPrimario}" Clicked="OnCrear" Margin="0,4,0,0" />
+                    <Button x:Name="BotonCrear" Style="{StaticResource BotonPrimario}" Clicked="OnCrear" Margin="0,4,0,0" />
+                    <Button x:Name="BotonVolver" Text="Ya tengo cuenta" Style="{StaticResource BotonSecundario}" Clicked="OnVolver" IsVisible="False" />
                 </VerticalStackLayout>
             </Border>
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              xmlns:fab="clr-namespace:MauiIcons.FontAwesome.Brand;assembly=MauiIcons.FontAwesome.Brand"
              x:Class="MotorCore_Garage.Pages.ClienteInicioPage"
              Style="{StaticResource Pagina}"
@@ -9,17 +10,43 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <VerticalStackLayout BackgroundColor="{StaticResource Graphite}" Padding="24,64,24,28" Spacing="6">
-                <Label x:Name="Saludo" FontFamily="OpenSansSemibold" FontSize="26" TextColor="{StaticResource White}" />
-                <Label x:Name="Resumen" FontSize="15" TextColor="#C9CDD1" />
+            <VerticalStackLayout Style="{StaticResource Hero}">
+                <Label x:Name="Saludo" Style="{StaticResource HeroTitulo}" />
+                <Label x:Name="Resumen" Style="{StaticResource HeroSubtitulo}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Padding="16,20,16,32" Spacing="16">
-                <Label Text="Próxima cita" Style="{StaticResource Seccion}" />
-                <VerticalStackLayout x:Name="ProximaCita" Spacing="12" />
+            <VerticalStackLayout Padding="16,20,16,32" Spacing="20">
 
-                <Label Text="Mis vehículos" Style="{StaticResource Seccion}" />
-                <VerticalStackLayout x:Name="Vehiculos" Spacing="12" />
+                <!-- Cifras rápidas -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Style="{StaticResource Tarjeta}" Padding="14">
+                        <VerticalStackLayout Spacing="4">
+                            <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=DirectionsCar, IconColor=#E8701A, IconSize=16}" VerticalOptions="Center" /><Label Text="Vehículos" Style="{StaticResource Etiqueta}" VerticalOptions="Center" /></HorizontalStackLayout>
+                            <Label x:Name="NumVehiculos" Style="{StaticResource Titulo}" />
+                        </VerticalStackLayout>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="14">
+                        <VerticalStackLayout Spacing="4">
+                            <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=CalendarMonth, IconColor=#E8701A, IconSize=16}" VerticalOptions="Center" /><Label Text="Citas próximas" Style="{StaticResource Etiqueta}" VerticalOptions="Center" /></HorizontalStackLayout>
+                            <Label x:Name="NumCitas" Style="{StaticResource Titulo}" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=CalendarMonth, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Próxima cita" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="ProximaCita" Spacing="12" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=NotificationsNone, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Mantenimientos pendientes" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="Pendientes" Spacing="12" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=DirectionsCar, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Mis vehículos" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="Vehiculos" Spacing="12" />
+                </VerticalStackLayout>
 
                 <Button Text="Agendar cita por WhatsApp" Style="{StaticResource BotonSecundario}" Clicked="OnAgendar"
                         ImageSource="{fab:FontAwesomeBrand Icon=Whatsapp, IconColor=#E8701A, IconSize=20}" Margin="0,8,0,0" />

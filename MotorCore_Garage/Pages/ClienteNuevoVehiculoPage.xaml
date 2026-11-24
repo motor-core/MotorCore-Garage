@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="MotorCore_Garage.Pages.ClienteNuevoVehiculoPage"
+             Title="Registrar mi vehículo"
+             Style="{StaticResource Pagina}">
+
+    <Grid RowDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource BarraVolver}" ColumnDefinitions="Auto,*">
+            <Button Text="‹" FontSize="24" BackgroundColor="Transparent" TextColor="{StaticResource White}"
+                    WidthRequest="48" HeightRequest="48" Padding="0" Clicked="OnVolver" />
+            <Label Grid.Column="1" Text="Registrar mi vehículo" Style="{StaticResource CabeceraTitulo}" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="16,20,16,32" Spacing="16">
+                <Border Style="{StaticResource Tarjeta}" Padding="20">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Placa" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Placa" Style="{StaticResource Campo}" Placeholder="ABC-12-34" MaxLength="15" ReturnType="Next" />
+
+                        <Label Text="Marca" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Marca" Style="{StaticResource Campo}" Placeholder="Ej. Nissan" ReturnType="Next" />
+
+                        <Label Text="Modelo" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Modelo" Style="{StaticResource Campo}" Placeholder="Ej. Versa" ReturnType="Next" />
+
+                        <Label Text="Año" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Anio" Style="{StaticResource Campo}" Placeholder="Ej. 2019" Keyboard="Numeric" MaxLength="4" ReturnType="Next" />
+
+                        <Label Text="Kilometraje actual" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Km" Style="{StaticResource Campo}" Placeholder="0" Keyboard="Numeric" />
+
+                        <Label x:Name="Error" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Label Text="Después podrás programar sus mantenimientos y recibir avisos cuando toquen."
+                       Style="{StaticResource Pie}" HorizontalTextAlignment="Center" />
+
+                <Button Text="Guardar vehículo" Style="{StaticResource BotonPrimario}" Clicked="OnGuardar" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

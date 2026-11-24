@@ -16,7 +16,17 @@ namespace MotorCore_Garage.Pages
             NombreDelTaller.Text = Taller.NombreTaller;
             Nombre.Text = cliente?.Nombre ?? "—";
             Telefono.Text = cliente?.Telefono ?? "—";
-            Usuario.Text = Taller.UsuarioActual;
+            Usuario.Text = $"Usuario: {Taller.UsuarioActual}";
+
+            var partes = (cliente?.Nombre ?? "?").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            Iniciales.Text = string.Concat(partes.Take(2).Select(p => p[0])).ToUpperInvariant();
+        }
+
+        // Mismo mensaje que el botón de WhatsApp de Inicio: abre el chat del taller con el texto de agendar cita.
+        async void OnWhatsApp(object? sender, EventArgs e)
+        {
+            if (!await Vistas.AgendarCitaWhatsApp())
+                await DisplayAlertAsync("WhatsApp", "El número del taller aún no está configurado.", "OK");
         }
 
         async void OnCerrarSesion(object? sender, EventArgs e)

@@ -38,7 +38,7 @@ namespace MotorCore_Garage.Pages
             Saturacion.Content = new Label
             {
                 Text = $"{texto} · {Taller.CitasEn(_dia)} citas",
-                FontFamily = "OpenSansSemibold",
+                FontFamily = "NotoSansSemibold",
                 FontSize = 12,
                 TextColor = estado == Desgaste.Proximo ? Ui.Recurso("Ink") : Ui.Recurso("White")
             };
@@ -67,9 +67,11 @@ namespace MotorCore_Garage.Pages
                 var caja = new VerticalStackLayout { Spacing = 2, HorizontalOptions = LayoutOptions.Fill };
                 caja.Add(new Label { Text = letra, FontSize = 12, HorizontalTextAlignment = TextAlignment.Center,
                     TextColor = seleccionado ? Ui.Recurso("White") : Ui.Recurso("InkMuted") });
-                caja.Add(new Label { Text = d.Day.ToString(), FontFamily = "OpenSansSemibold", FontSize = 16,
+                // Días no seleccionados: gris claro (un tono más oscuro que el blanco del día activo).
+                var oscuro = Application.Current!.RequestedTheme == AppTheme.Dark;
+                caja.Add(new Label { Text = d.Day.ToString(), FontFamily = "NotoSansSemibold", FontSize = 16,
                     HorizontalTextAlignment = TextAlignment.Center,
-                    TextColor = seleccionado ? Ui.Recurso("White") : Ui.Recurso("Ink") });
+                    TextColor = seleccionado ? Ui.Recurso("White") : Ui.Recurso(oscuro ? "Gray200" : "Gray400") });
                 caja.Add(new BoxView { WidthRequest = 8, HeightRequest = 8, CornerRadius = 4,
                     BackgroundColor = Ui.Recurso(punto), HorizontalOptions = LayoutOptions.Center });
 

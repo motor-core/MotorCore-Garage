@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              xmlns:fab="clr-namespace:MauiIcons.FontAwesome.Brand;assembly=MauiIcons.FontAwesome.Brand"
              x:Class="MotorCore_Garage.Pages.ClienteCitasPage"
              Style="{StaticResource Pagina}"
@@ -8,17 +9,24 @@
 
     <ScrollView>
         <VerticalStackLayout Spacing="0">
-            <VerticalStackLayout BackgroundColor="{StaticResource Graphite}" Padding="24,64,24,28" Spacing="6">
-                <Label Text="Mis citas" FontFamily="OpenSansSemibold" FontSize="26" TextColor="{StaticResource White}" />
-                <Label Text="Próximas y pasadas" FontSize="15" TextColor="#C9CDD1" />
+            <VerticalStackLayout Style="{StaticResource Hero}">
+                <Label Text="Mis citas" Style="{StaticResource HeroTitulo}" />
+                <Label Text="Próximas y pasadas" Style="{StaticResource HeroSubtitulo}" />
             </VerticalStackLayout>
 
-            <VerticalStackLayout Padding="16,20,16,32" Spacing="12">
+            <VerticalStackLayout Padding="16,20,16,32" Spacing="20">
                 <Button Text="Agendar cita por WhatsApp" Style="{StaticResource BotonPrimario}" Clicked="OnAgendar"
                         ImageSource="{fab:FontAwesomeBrand Icon=Whatsapp, IconColor=White, IconSize=20}" />
-                <VerticalStackLayout x:Name="Lista" Spacing="12" Margin="0,8,0,0" />
-                <Label x:Name="Vacio" Text="No tienes citas registradas." Style="{StaticResource Pie}"
-                       HorizontalTextAlignment="Center" IsVisible="False" />
+
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=CalendarMonth, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Próximas" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="Proximas" Spacing="12" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout x:Name="SeccionPasadas" Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=Receipt, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Pasadas" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="Pasadas" Spacing="12" />
+                </VerticalStackLayout>
             </VerticalStackLayout>
         </VerticalStackLayout>
     </ScrollView>

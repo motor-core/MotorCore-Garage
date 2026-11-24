@@ -15,8 +15,9 @@ namespace MotorCore_Garage
                 .UseFontAwesomeBrandMauiIcons()
                 .ConfigureFonts(fonts =>
                 {
-                    fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                    fonts.AddFont("NotoSans-Regular.ttf", "NotoSansRegular");
+                    fonts.AddFont("NotoSans-SemiBold.ttf", "NotoSansSemibold");
+                    fonts.AddFont("NotoSansDisplay-SemiBold.ttf", "NotoSansDisplaySemibold");
                 });
 
 #if DEBUG

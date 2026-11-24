@@ -38,6 +38,29 @@ namespace MotorCore_Garage.Pages
             Bahias.Text = $"{ocupadas} de {Taller.Bahias}";
             BarraBahias.Progress = Math.Min(1.0, ocupadas / (double)Taller.Bahias);
 
+            // Gráfica del estado de desgaste del parque: cada vehículo cuenta por su componente peor.
+            var porVehiculo = new List<Porcion>
+            {
+                new("Buen estado", Taller.Vehiculos.Count(v => Vistas.Peor(v).Estado == Desgaste.Ok), Ui.Recurso("WearOk")),
+                new("Próximo", Taller.Vehiculos.Count(v => Vistas.Peor(v).Estado == Desgaste.Proximo), Ui.Recurso("WearSoon")),
+                new("Vencido", Taller.Vehiculos.Count(v => Vistas.Peor(v).Estado == Desgaste.Vencido), Ui.Recurso("WearDue")),
+            };
+            PastelVehiculos.Drawable = new PastelDrawable(porVehiculo);
+            PastelVehiculos.Invalidate();
+            LeyendaVehiculos.Children.Clear();
+            LeyendaVehiculos.Children.Add(PastelDrawable.Leyenda(porVehiculo));
+
+            // Gráfica de las citas de hoy según su estado en recepción.
+            var citasHoy = Taller.Citas.Where(c => c.Fecha.Date == hoy).ToList();
+            var porCita = new (string Estado, string Color)[]
+            {
+                ("Programada", "Gray400"), ("Recibido", "Primary"), ("En proceso", "WearSoon"), ("Listo", "WearOk"), ("Entregado", "InkMuted")
+            }.Select(e => new Porcion(e.Estado, citasHoy.Count(c => c.Estado == e.Estado), Ui.Recurso(e.Color))).ToList();
+            PastelCitas.Drawable = new PastelDrawable(porCita);
+            PastelCitas.Invalidate();
+            LeyendaCitas.Children.Clear();
+            LeyendaCitas.Children.Add(PastelDrawable.Leyenda(porCita));
+
             ListaCitas.Children.Clear();
             var citas = Taller.Citas.Where(c => c.Fecha.Date == hoy).OrderBy(c => c.Fecha).ToList();
             if (citas.Count == 0)
@@ -55,19 +78,38 @@ namespace MotorCore_Garage.Pages
                     contactar: async () => await Vistas.Contactar(this, a.Cliente)));
         }
 
+        // Abre la hoja de acciones: el fondo se atenúa y el panel sube desde abajo.
         async void OnFab(object? sender, EventArgs e)
         {
-            var accion = await DisplayActionSheetAsync("Acciones rápidas", "Cancelar", null,
-                "Nuevo cliente", "Nuevo vehículo", "Registrar servicio", "Nueva cita", "Recepción de vehículo", "Registrar kilometraje");
-            switch (accion)
-            {
-                case "Nuevo cliente": await Shell.Current.GoToAsync("nuevocliente"); break;
-                case "Nuevo vehículo": await Shell.Current.GoToAsync("nuevovehiculo"); break;
-                case "Registrar servicio": await Shell.Current.GoToAsync("servicio"); break;
-                case "Nueva cita": await Shell.Current.GoToAsync("nuevacita"); break;
-                case "Recepción de vehículo": await Shell.Current.GoToAsync("recepcion"); break;
-                case "Registrar kilometraje": await Shell.Current.GoToAsync("kilometraje"); break;
-            }
+            Acciones.Opacity = 0;
+            Acciones.IsVisible = true;
+            Hoja.TranslationY = 400;
+            await Task.WhenAll(Acciones.FadeTo(1, 180), Hoja.TranslateTo(0, 0, 220, Easing.CubicOut));
+        }
+
+        async void OnCerrarAcciones(object? sender, EventArgs e) => await CerrarAcciones();
+
+        // Cada opción lleva en AutomationId la ruta de la pantalla a la que va.
+        async void OnAccion(object? sender, TappedEventArgs e)
+        {
+            var ruta = ((View)sender!).AutomationId;
+            await CerrarAcciones();
+            await Shell.Current.GoToAsync(ruta);
+        }
+
+        async Task CerrarAcciones()
+        {
+            if (!Acciones.IsVisible) return;
+            await Task.WhenAll(Acciones.FadeTo(0, 150), Hoja.TranslateTo(0, 400, 180, Easing.CubicIn));
+            Acciones.IsVisible = false;
+        }
+
+        // El botón Atrás del teléfono cierra la hoja antes de salir de la pantalla.
+        protected override bool OnBackButtonPressed()
+        {
+            if (!Acciones.IsVisible) return base.OnBackButtonPressed();
+            _ = CerrarAcciones();
+            return true;
         }
     }
 }

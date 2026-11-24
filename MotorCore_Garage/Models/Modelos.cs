@@ -109,9 +109,25 @@ namespace MotorCore_Garage.Models
         public string Texto { get; set; } = "";
     }
 
+    // Mantenimiento que el cliente programa para su vehículo (por ejemplo, cambio de aceite cada 5,000 km o 6 meses).
+    [Table("Mantenimientos")]
+    public class Mantenimiento
+    {
+        [PrimaryKey, AutoIncrement] public int Id { get; set; }
+        public int VehiculoId { get; set; }
+        [MaxLength(80)] public string Nombre { get; set; } = "";
+        public int IntervaloKm { get; set; }          // 0 = sin límite por kilómetros
+        public int IntervaloMeses { get; set; }       // 0 = sin límite por tiempo
+        public int KmUltimo { get; set; }             // Kilometraje de la última vez que se hizo
+        public DateTime FechaUltima { get; set; } = DateTime.Today;
+        public DateTime UltimoAviso { get; set; } = DateTime.MinValue; // Último día en que se notificó
+    }
+
     // ---- Modelos de presentación (no se guardan) ----
 
     public record EstadoComponente(string Nombre, int Porcentaje, int KmRestantes, Desgaste Estado);
+
+    public record EstadoMantenimiento(Mantenimiento Mantenimiento, int KmRestantes, DateTime? FechaVence, Desgaste Estado);
 
     public record Alerta(Vehiculo Vehiculo, Cliente Cliente, EstadoComponente Componente, DateTime FechaEstimada, GrupoAlerta Grupo);
 }

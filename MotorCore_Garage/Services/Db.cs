@@ -25,6 +25,7 @@ namespace MotorCore_Garage.Services
             conexion.CreateTable<Models.Cita>();
             conexion.CreateTable<Models.RegistroServicio>();
             conexion.CreateTable<Models.EntradaBitacora>();
+            conexion.CreateTable<Models.Mantenimiento>();
 
             // Catálogo de componentes con intervalos por defecto (solo la primera vez).
             if (conexion.Table<Models.ComponenteDef>().Count() == 0)

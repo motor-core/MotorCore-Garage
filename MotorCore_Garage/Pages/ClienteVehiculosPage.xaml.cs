@@ -19,8 +19,13 @@ namespace MotorCore_Garage.Pages
             {
                 var id = v.Id;
                 Lista.Children.Add(Vistas.VehiculoCard(v,
-                    () => Shell.Current.GoToAsync("expediente", new Dictionary<string, object> { ["VehiculoId"] = id })));
+                    () => Shell.Current.GoToAsync("mantenimientos", new Dictionary<string, object> { ["VehiculoId"] = id })));
             }
+        }
+
+        async void OnRegistrar(object? sender, EventArgs e)
+        {
+            await Shell.Current.GoToAsync("clientenuevovehiculo");
         }
     }
 }

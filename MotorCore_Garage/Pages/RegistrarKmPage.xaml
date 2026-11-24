@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              x:Class="MotorCore_Garage.Pages.RegistrarKmPage"
              Title="Registrar kilometraje"
              Style="{StaticResource Pagina}">
 
     <Grid RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="8,44,16,12" ColumnDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource BarraVolver}" ColumnDefinitions="Auto,*">
             <Button Text="‹" FontSize="24" BackgroundColor="Transparent" TextColor="{StaticResource White}"
                     WidthRequest="48" HeightRequest="48" Padding="0" Clicked="OnVolver" />
-            <Label Grid.Column="1" Text="Registrar kilometraje" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="Registrar kilometraje" Style="{StaticResource CabeceraTitulo}" />
         </Grid>
 
         <ScrollView Grid.Row="1">
@@ -23,7 +24,7 @@
 
                 <Label Text="Kilometraje actual" Style="{StaticResource Etiqueta}" />
                 <Entry x:Name="Km" Placeholder="0" Keyboard="Numeric" FontSize="36" HeightRequest="80"
-                       FontFamily="OpenSansSemibold" TextChanged="OnKmCambio" />
+                       FontFamily="NotoSansSemibold" TextChanged="OnKmCambio" />
                 <Label x:Name="ErrorKm" Style="{StaticResource Pie}" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
 
                 <Border Style="{StaticResource Tarjeta}" Margin="0,8,0,0">
@@ -33,7 +34,7 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Button Text="Guardar kilometraje" Style="{StaticResource BotonPrimario}" Margin="0,8,0,0" Clicked="OnGuardar" />
+                <Button Text="Guardar kilometraje" ImageSource="{mi:Material Icon=Save, IconColor=White, IconSize=20}" Style="{StaticResource BotonPrimario}" Margin="0,8,0,0" Clicked="OnGuardar" />
             </VerticalStackLayout>
         </ScrollView>
 

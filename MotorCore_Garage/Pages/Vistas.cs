@@ -125,6 +125,9 @@ namespace MotorCore_Garage.Pages
             return fila;
         }
 
+        // Texto de lista vacía, con el mismo estilo en todas las pantallas.
+        public static Label SinDatos(string texto) => new() { Text = texto, Style = Estilo("EstadoVacio") };
+
         public static string TextoRestante(EstadoComponente e) =>
             e.KmRestantes > 0 ? $"Faltan {e.KmRestantes:N0} km" : $"Vencido hace {-e.KmRestantes:N0} km";
 

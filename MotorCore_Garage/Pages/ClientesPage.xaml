@@ -7,10 +7,10 @@
 
     <Grid RowDefinitions="Auto,Auto,*">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="8,44,16,12" ColumnDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource BarraVolver}" ColumnDefinitions="Auto,*">
             <Button Text="‹" FontSize="24" BackgroundColor="Transparent" TextColor="{StaticResource White}"
                     WidthRequest="48" HeightRequest="48" Padding="0" Clicked="OnVolver" />
-            <Label Grid.Column="1" Text="Clientes" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="Clientes" Style="{StaticResource CabeceraTitulo}" />
         </Grid>
 
         <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Padding="12,4" Margin="16,16,16,0">

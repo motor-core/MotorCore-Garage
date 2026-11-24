@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              x:Class="MotorCore_Garage.Pages.ClienteDetallePage"
              Title="Cliente"
              Style="{StaticResource Pagina}">
 
     <Grid RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="8,44,16,12" ColumnDefinitions="Auto,*">
+        <Grid Grid.Row="0" Style="{StaticResource BarraVolver}" ColumnDefinitions="Auto,*">
             <Button Text="‹" FontSize="24" BackgroundColor="Transparent" TextColor="{StaticResource White}"
                     WidthRequest="48" HeightRequest="48" Padding="0" Clicked="OnVolver" />
-            <Label Grid.Column="1" Text="Cliente" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
+            <Label Grid.Column="1" Text="Cliente" Style="{StaticResource CabeceraTitulo}" />
         </Grid>
 
         <ScrollView Grid.Row="1">
@@ -19,7 +20,7 @@
                 <Grid ColumnDefinitions="Auto,*" ColumnSpacing="16">
                     <Border BackgroundColor="{StaticResource Secondary}" WidthRequest="64" HeightRequest="64"
                             StrokeThickness="0" StrokeShape="RoundRectangle 32">
-                        <Label x:Name="Iniciales" FontFamily="OpenSansSemibold" FontSize="20"
+                        <Label x:Name="Iniciales" FontFamily="NotoSansSemibold" FontSize="20"
                                TextColor="{StaticResource Graphite}"
                                HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
                     </Border>
@@ -30,11 +31,11 @@
                 </Grid>
 
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                    <Button Text="Llamar" Style="{StaticResource BotonSecundario}" Clicked="OnLlamar" />
+                    <Button Text="Llamar" ImageSource="{mi:Material Icon=ContactPhone, IconColor=#E8701A, IconSize=20}" Style="{StaticResource BotonSecundario}" Clicked="OnLlamar" />
                     <Button Grid.Column="1" Text="WhatsApp" Style="{StaticResource BotonPrimario}" Clicked="OnWhatsApp" />
                 </Grid>
 
-                <Button x:Name="BotonAcceso" Text="Crear cuenta de acceso" Style="{StaticResource BotonSecundario}" Clicked="OnCrearAcceso" />
+                <Button x:Name="BotonAcceso" Text="Crear cuenta de acceso" ImageSource="{mi:Material Icon=PersonAdd, IconColor=#E8701A, IconSize=20}" Style="{StaticResource BotonSecundario}" Clicked="OnCrearAcceso" />
 
                 <Label Text="Vehículos" Style="{StaticResource Seccion}" />
                 <VerticalStackLayout x:Name="Vehiculos" Spacing="12" />

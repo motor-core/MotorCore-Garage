@@ -13,6 +13,7 @@
     <Color x:Key="PrimaryContainerDark">#4A2A12</Color>
     <Color x:Key="Graphite">#2F3437</Color>
     <Color x:Key="GraphiteDark">#0F1113</Color>
+    <Color x:Key="HeaderMuted">#C9CDD1</Color>
 
     <Color x:Key="Secondary">#DFD8F7</Color>
     <Color x:Key="SecondaryDarkText">#9880e5</Color>

@@ -19,6 +19,9 @@ namespace MotorCore_Garage
             Routing.RegisterRoute("nuevocliente", typeof(NuevoClientePage));
             Routing.RegisterRoute("nuevovehiculo", typeof(NuevoVehiculoPage));
             Routing.RegisterRoute("servicio", typeof(RegistrarServicioPage));
+            Routing.RegisterRoute("clientenuevovehiculo", typeof(ClienteNuevoVehiculoPage));
+            Routing.RegisterRoute("mantenimientos", typeof(ClienteMantenimientosPage));
+            Routing.RegisterRoute("nuevomantenimiento", typeof(ClienteNuevoMantenimientoPage));
         }
 
         // Inicia con splash y login fuera de Shell; al entrar se cambia a la navegación con pestañas.

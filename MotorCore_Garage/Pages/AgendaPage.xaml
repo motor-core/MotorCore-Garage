@@ -7,18 +7,18 @@
 
     <Grid RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="16,44,16,12" ColumnDefinitions="*,Auto">
-            <Label Text="Agenda" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
-            <Border Grid.Column="1" BackgroundColor="{StaticResource Card}" Style="{StaticResource Chip}" VerticalOptions="Center">
-                <Label Text="☁ Modo local" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource Ink}" />
-            </Border>
-        </Grid>
+        <VerticalStackLayout Grid.Row="0" Style="{StaticResource Hero}">
+            <Label Text="Agenda" Style="{StaticResource HeroTitulo}" />
+            <Label Text="Citas por día y por bahía" Style="{StaticResource HeroSubtitulo}" />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="16,12,16,96" Spacing="16">
+            <VerticalStackLayout Padding="16,16,16,96" Spacing="16">
 
                 <!-- Vista semanal: el punto indica la saturación de cada día -->
-                <Grid x:Name="Semana" ColumnDefinitions="*,*,*,*,*,*,*" ColumnSpacing="4" />
+                <Border Style="{StaticResource Tarjeta}" Padding="8">
+                    <Grid x:Name="Semana" ColumnDefinitions="*,*,*,*,*,*,*" ColumnSpacing="4" />
+                </Border>
 
                 <Label x:Name="Titulo" Style="{StaticResource Seccion}" />
 
@@ -32,7 +32,7 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Button Grid.Row="1" Text="+" FontSize="28" FontFamily="OpenSansSemibold"
+        <Button Grid.Row="1" Text="+" FontSize="28" FontFamily="NotoSansSemibold"
                 BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}"
                 CornerRadius="16" WidthRequest="56" HeightRequest="56" Padding="0"
                 HorizontalOptions="End" VerticalOptions="End" Margin="16"

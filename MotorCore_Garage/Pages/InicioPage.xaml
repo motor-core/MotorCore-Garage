@@ -1,63 +1,88 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:mi="clr-namespace:MauiIcons.Material;assembly=MauiIcons.Material"
              x:Class="MotorCore_Garage.Pages.InicioPage"
              Title="Inicio"
              Style="{StaticResource Pagina}">
 
     <Grid RowDefinitions="Auto,*">
 
-        <!-- Barra superior con indicador de modo local -->
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="16,44,16,12" ColumnDefinitions="*,Auto">
-            <Label x:Name="Encabezado" Text="MotorCode Garage" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
-            <Border Grid.Column="1" BackgroundColor="{StaticResource Card}" Style="{StaticResource Chip}" VerticalOptions="Center">
-                <Label Text="☁ Modo local" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource Ink}" />
-            </Border>
-        </Grid>
+        <VerticalStackLayout Grid.Row="0" Style="{StaticResource Hero}">
+            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                <Image Source="logo.svg" HeightRequest="44" WidthRequest="44" VerticalOptions="Center" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label x:Name="Fecha" Style="{StaticResource HeroSubtitulo}" FontSize="14" />
+                    <Label x:Name="Encabezado" Text="MotorCode Garage" Style="{StaticResource HeroTitulo}" FontSize="22" />
+                </VerticalStackLayout>
+            </Grid>
+            <Label x:Name="Saludo" Style="{StaticResource HeroSubtitulo}" />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="16,16,16,96" Spacing="16">
+            <VerticalStackLayout Padding="16,20,16,96" Spacing="20">
 
-                <Label x:Name="Saludo" Style="{StaticResource Pie}" FontSize="14" />
-                <Label x:Name="Fecha" Style="{StaticResource Titulo}" />
-
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="8" RowDefinitions="Auto,Auto" RowSpacing="8">
-                    <Border Style="{StaticResource Tarjeta}" Padding="12">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" RowDefinitions="Auto,Auto" RowSpacing="12">
+                    <Border Style="{StaticResource Tarjeta}" Padding="14">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Citas de hoy" Style="{StaticResource Etiqueta}" />
+                            <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=Event, IconColor=#E8701A, IconSize=16}" VerticalOptions="Center" /><Label Text="Citas de hoy" Style="{StaticResource Etiqueta}" VerticalOptions="Center" /></HorizontalStackLayout>
                             <Label x:Name="CitasHoy" Style="{StaticResource Titulo}" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="12">
+                    <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="14">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Vehículos en taller" Style="{StaticResource Etiqueta}" />
+                            <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=DirectionsCar, IconColor=#E8701A, IconSize=16}" VerticalOptions="Center" /><Label Text="Vehículos en taller" Style="{StaticResource Etiqueta}" VerticalOptions="Center" /></HorizontalStackLayout>
                             <Label x:Name="EnTaller" Style="{StaticResource Titulo}" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Padding="12">
+                    <Border Grid.Row="1" Style="{StaticResource Tarjeta}" Padding="14">
                         <VerticalStackLayout Spacing="4">
-                            <Label Text="Alertas urgentes" Style="{StaticResource Etiqueta}" />
+                            <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=NotificationsNone, IconColor=#C62828, IconSize=16}" VerticalOptions="Center" /><Label Text="Alertas urgentes" Style="{StaticResource Etiqueta}" VerticalOptions="Center" /></HorizontalStackLayout>
                             <Label x:Name="Urgentes" Style="{StaticResource Titulo}" TextColor="{StaticResource WearDue}" />
                         </VerticalStackLayout>
                     </Border>
-                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="12">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Bahías ocupadas" Style="{StaticResource Etiqueta}" />
+                    <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="14">
+                        <VerticalStackLayout Spacing="6">
+                            <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=Garage, IconColor=#E8701A, IconSize=16}" VerticalOptions="Center" /><Label Text="Bahías ocupadas" Style="{StaticResource Etiqueta}" VerticalOptions="Center" /></HorizontalStackLayout>
                             <Label x:Name="Bahias" Style="{StaticResource Titulo}" />
                             <ProgressBar x:Name="BarraBahias" ProgressColor="{StaticResource Primary}" HeightRequest="8" />
                         </VerticalStackLayout>
                     </Border>
                 </Grid>
 
-                <Label Text="Próximas citas" Style="{StaticResource Seccion}" />
-                <VerticalStackLayout x:Name="ListaCitas" Spacing="12" />
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=Analytics, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Resumen" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <Border Style="{StaticResource Tarjeta}" Padding="14">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Estado del parque" Style="{StaticResource CuerpoStrong}" FontSize="14" />
+                                <GraphicsView x:Name="PastelVehiculos" HeightRequest="120" />
+                                <VerticalStackLayout x:Name="LeyendaVehiculos" />
+                            </VerticalStackLayout>
+                        </Border>
+                        <Border Grid.Column="1" Style="{StaticResource Tarjeta}" Padding="14">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="Citas de hoy" Style="{StaticResource CuerpoStrong}" FontSize="14" />
+                                <GraphicsView x:Name="PastelCitas" HeightRequest="120" />
+                                <VerticalStackLayout x:Name="LeyendaCitas" />
+                            </VerticalStackLayout>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
 
-                <Label Text="Alertas de mantenimiento" Style="{StaticResource Seccion}" />
-                <VerticalStackLayout x:Name="ListaAlertas" Spacing="12" />
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=CalendarMonth, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Próximas citas" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="ListaCitas" Spacing="12" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="12">
+                    <HorizontalStackLayout Spacing="6"><Image Source="{mi:Material Icon=NotificationsNone, IconColor=#E8701A, IconSize=20}" VerticalOptions="Center" /><Label Text="Alertas de mantenimiento" Style="{StaticResource Seccion}" VerticalOptions="Center" /></HorizontalStackLayout>
+                    <VerticalStackLayout x:Name="ListaAlertas" Spacing="12" />
+                </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
 
-        <Button Grid.Row="1" Text="+" FontSize="28" FontFamily="OpenSansSemibold"
+        <Button Grid.Row="1" Text="+" FontSize="28" FontFamily="NotoSansSemibold"
                 BackgroundColor="{StaticResource Primary}" TextColor="{StaticResource White}"
                 CornerRadius="16" WidthRequest="56" HeightRequest="56" Padding="0"
                 HorizontalOptions="End" VerticalOptions="End" Margin="16"
@@ -68,5 +93,94 @@
                 Margin="16" VerticalOptions="End">
             <Label x:Name="SnackTexto" TextColor="{StaticResource White}" FontSize="14" />
         </Border>
+
+        <!-- Hoja de acciones rápidas: fondo atenuado y panel que sube desde abajo -->
+        <Grid x:Name="Acciones" Grid.RowSpan="2" IsVisible="False" Opacity="0">
+            <BoxView BackgroundColor="#8C000000">
+                <BoxView.GestureRecognizers>
+                    <TapGestureRecognizer Tapped="OnCerrarAcciones" />
+                </BoxView.GestureRecognizers>
+            </BoxView>
+
+            <Border x:Name="Hoja" VerticalOptions="End" Padding="20,12,20,20" StrokeThickness="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Card}, Dark={StaticResource CardDark}}"
+                    StrokeShape="RoundRectangle 24" Margin="12,0,12,12">
+                <ScrollView MaximumHeightRequest="460">
+                <VerticalStackLayout Spacing="12">
+                    <Border BackgroundColor="{StaticResource Outline}" WidthRequest="40" HeightRequest="4" StrokeThickness="0"
+                            StrokeShape="RoundRectangle 2" HorizontalOptions="Center" Margin="0,0,0,4" />
+                    <Label Text="Acciones rápidas" Style="{StaticResource Seccion}" />
+
+                    <Border AutomationId="nuevocliente" Style="{StaticResource Tarjeta}" Padding="12">
+                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnAccion" /></Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Image Source="{mi:Material Icon=PersonAdd, IconColor=#E8701A, IconSize=24}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Label Grid.Column="1" Text="Nuevo cliente" Style="{StaticResource CuerpoStrong}" VerticalOptions="Center" />
+                            <Image Grid.Column="2" Source="{mi:Material Icon=ChevronRight, IconColor=#8A9199, IconSize=22}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border AutomationId="nuevovehiculo" Style="{StaticResource Tarjeta}" Padding="12">
+                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnAccion" /></Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Image Source="{mi:Material Icon=DirectionsCar, IconColor=#E8701A, IconSize=24}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Label Grid.Column="1" Text="Nuevo vehículo" Style="{StaticResource CuerpoStrong}" VerticalOptions="Center" />
+                            <Image Grid.Column="2" Source="{mi:Material Icon=ChevronRight, IconColor=#8A9199, IconSize=22}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border AutomationId="servicio" Style="{StaticResource Tarjeta}" Padding="12">
+                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnAccion" /></Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Image Source="{mi:Material Icon=Build, IconColor=#E8701A, IconSize=24}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Label Grid.Column="1" Text="Registrar servicio" Style="{StaticResource CuerpoStrong}" VerticalOptions="Center" />
+                            <Image Grid.Column="2" Source="{mi:Material Icon=ChevronRight, IconColor=#8A9199, IconSize=22}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border AutomationId="nuevacita" Style="{StaticResource Tarjeta}" Padding="12">
+                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnAccion" /></Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Image Source="{mi:Material Icon=EventAvailable, IconColor=#E8701A, IconSize=24}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Label Grid.Column="1" Text="Nueva cita" Style="{StaticResource CuerpoStrong}" VerticalOptions="Center" />
+                            <Image Grid.Column="2" Source="{mi:Material Icon=ChevronRight, IconColor=#8A9199, IconSize=22}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border AutomationId="recepcion" Style="{StaticResource Tarjeta}" Padding="12">
+                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnAccion" /></Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Image Source="{mi:Material Icon=Garage, IconColor=#E8701A, IconSize=24}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Label Grid.Column="1" Text="Recepción de vehículo" Style="{StaticResource CuerpoStrong}" VerticalOptions="Center" />
+                            <Image Grid.Column="2" Source="{mi:Material Icon=ChevronRight, IconColor=#8A9199, IconSize=22}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Border AutomationId="kilometraje" Style="{StaticResource Tarjeta}" Padding="12">
+                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnAccion" /></Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" WidthRequest="44" HeightRequest="44" StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                <Image Source="{mi:Material Icon=Tune, IconColor=#E8701A, IconSize=24}" WidthRequest="24" HeightRequest="24" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Border>
+                            <Label Grid.Column="1" Text="Registrar kilometraje" Style="{StaticResource CuerpoStrong}" VerticalOptions="Center" />
+                            <Image Grid.Column="2" Source="{mi:Material Icon=ChevronRight, IconColor=#8A9199, IconSize=22}" VerticalOptions="Center" />
+                        </Grid>
+                    </Border>
+
+                    <Button Text="Cancelar" Style="{StaticResource BotonSecundario}" Clicked="OnCerrarAcciones" Margin="0,4,0,0" />
+                </VerticalStackLayout>
+                </ScrollView>
+            </Border>
+        </Grid>
     </Grid>
 </ContentPage>

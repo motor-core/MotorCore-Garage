@@ -10,14 +10,23 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <VerticalStackLayout BackgroundColor="{StaticResource Graphite}" Padding="24,72,24,44" Spacing="6">
+            <VerticalStackLayout Style="{StaticResource Hero}" Padding="24,56,24,24">
                 <Image x:Name="Logo" Source="logo.svg" HeightRequest="72" WidthRequest="72" HorizontalOptions="Start" Margin="0,0,0,12" />
-                <Label x:Name="Encabezado" Text="MotorCode Garage" FontFamily="OpenSansSemibold" FontSize="26" TextColor="{StaticResource White}" />
-                <Label Text="Inicia sesión para continuar" FontSize="15" TextColor="#C9CDD1" />
+                <Label x:Name="Encabezado" Text="MotorCode Garage" Style="{StaticResource HeroTitulo}" />
+                <Label Text="Inicia sesión para continuar" Style="{StaticResource HeroSubtitulo}" />
             </VerticalStackLayout>
 
             <Border Style="{StaticResource Tarjeta}" Margin="16,20,16,24" Padding="20">
                 <VerticalStackLayout Spacing="12">
+
+                    <!-- Tipo de acceso: monitoreo del taller o cliente -->
+                    <Label Text="Entrar como" Style="{StaticResource Etiqueta}" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button x:Name="BotonModoMonitor" Text="Monitor" HeightRequest="48" FontSize="14" Clicked="OnModoMonitor" />
+                        <Button x:Name="BotonModoCliente" Grid.Column="1" Text="Cliente" HeightRequest="48" FontSize="14" Clicked="OnModoCliente" />
+                    </Grid>
+                    <Label x:Name="AyudaModo" Style="{StaticResource Pie}" />
+
                     <Label Text="Usuario" Style="{StaticResource Etiqueta}" />
                     <Entry x:Name="Usuario" Style="{StaticResource Campo}" Placeholder="Tu usuario" ReturnType="Next" />
 
@@ -33,6 +42,12 @@
                     <Label x:Name="Error" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
 
                     <Button Text="Entrar" Style="{StaticResource BotonPrimario}" Clicked="OnEntrar" Margin="0,4,0,0" />
+
+                    <!-- Solo en modo cliente: el taller ya te registró y ahora creas tu acceso -->
+                    <VerticalStackLayout x:Name="SeccionCuentaCliente" Spacing="8" IsVisible="False" Margin="0,8,0,0">
+                        <Label Text="¿Aún no tienes cuenta de cliente?" Style="{StaticResource Pie}" HorizontalTextAlignment="Center" />
+                        <Button Text="Crear mi cuenta" Style="{StaticResource BotonSecundario}" Clicked="OnCrearCuenta" />
+                    </VerticalStackLayout>
 
                     <Label Text="¿Quieres una cita?" Style="{StaticResource Pie}" HorizontalTextAlignment="Center" Margin="0,8,0,0" />
                     <Button Text="Agendar cita por WhatsApp" Style="{StaticResource BotonSecundario}" Clicked="OnAgendarWhatsApp"

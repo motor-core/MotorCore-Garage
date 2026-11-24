@@ -7,12 +7,10 @@
 
     <Grid RowDefinitions="Auto,*">
 
-        <Grid Grid.Row="0" BackgroundColor="{StaticResource Graphite}" Padding="16,44,16,12" ColumnDefinitions="*,Auto">
-            <Label Text="Alertas predictivas" Style="{StaticResource Seccion}" TextColor="{StaticResource White}" VerticalOptions="Center" />
-            <Border Grid.Column="1" BackgroundColor="{StaticResource Card}" Style="{StaticResource Chip}" VerticalOptions="Center">
-                <Label Text="☁ Modo local" FontFamily="OpenSansSemibold" FontSize="12" TextColor="{StaticResource Ink}" />
-            </Border>
-        </Grid>
+        <VerticalStackLayout Grid.Row="0" Style="{StaticResource Hero}">
+            <Label Text="Alertas" Style="{StaticResource HeroTitulo}" />
+            <Label Text="Mantenimiento predictivo por componente" Style="{StaticResource HeroSubtitulo}" />
+        </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout x:Name="Lista" Padding="16,16,16,96" Spacing="12" />
