@@ -1,3 +1,4 @@
+using MotorCore_Garage.Logica;
 using MotorCore_Garage.Models;
 
 namespace MotorCore_Garage.Services
@@ -6,7 +7,7 @@ namespace MotorCore_Garage.Services
     public static class Taller
     {
         public const int KmPorDia = 50;            // Ritmo promedio para estimar fechas
-        public const int UmbralProximo = 1000;     // Km restantes para marcar "próximo"
+        public const int UmbralProximo = ReglasMantenimiento.UmbralProximo;     // Km restantes para marcar "próximo"
         public static readonly string[] Horarios = { "08:00", "09:00", "10:00", "11:00", "12:00", "13:00", "14:00", "15:00" };
 
         public static Rol RolActual { get; private set; } = Rol.Administrador;
@@ -216,17 +217,8 @@ namespace MotorCore_Garage.Services
             Mantenimientos.Where(m => m.VehiculoId == vehiculoId);
 
         // Vence por kilómetros (si tiene intervalo en km) o por tiempo (si tiene meses). Lo que llegue primero manda.
-        public static EstadoMantenimiento EstadoDe(Mantenimiento m, Vehiculo v)
-        {
-            int? kmRestantes = m.IntervaloKm > 0 ? m.KmUltimo + m.IntervaloKm - v.KmActual : null;
-            DateTime? fechaVence = m.IntervaloMeses > 0 ? m.FechaUltima.AddMonths(m.IntervaloMeses) : null;
-
-            var vencido = kmRestantes is <= 0 || fechaVence is { } fv && fv.Date <= DateTime.Today;
-            var proximo = kmRestantes is { } kr && kr <= UmbralProximo || fechaVence is { } fp && fp.Date <= DateTime.Today.AddDays(30);
-
-            var estado = vencido ? Desgaste.Vencido : proximo ? Desgaste.Proximo : Desgaste.Ok;
-            return new EstadoMantenimiento(m, kmRestantes ?? 0, fechaVence, estado);
-        }
+        public static EstadoMantenimiento EstadoDe(Mantenimiento m, Vehiculo v) =>
+            ReglasMantenimiento.EstadoDe(m, v, DateTime.Today);
 
         // Pendientes (próximos o vencidos) de todos los vehículos de un cliente.
         public static List<EstadoMantenimiento> PendientesDeCliente(int clienteId) =>

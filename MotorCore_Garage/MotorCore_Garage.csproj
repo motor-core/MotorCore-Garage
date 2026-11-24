@@ -82,4 +82,8 @@
 		<GoogleServicesJson Include="Platforms\Android\google-services.json" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\MotorCore_Garage.Core\MotorCore_Garage.Core.csproj" />
+	</ItemGroup>
+
 </Project>

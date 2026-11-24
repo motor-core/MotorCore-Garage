@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="MotorCore_Garage.Core/MotorCore_Garage.Core.csproj" />
+  <Project Path="MotorCore_Garage.Tests/MotorCore_Garage.Tests.csproj" />
   <Project Path="MotorCore_Garage/MotorCore_Garage.csproj" />
 </Solution>
