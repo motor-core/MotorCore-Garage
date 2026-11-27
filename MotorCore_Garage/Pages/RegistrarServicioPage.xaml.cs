@@ -105,7 +105,13 @@ namespace MotorCore_Garage.Pages
                 return;
             }
 
-            var costo = decimal.TryParse(Costo.Text, NumberStyles.Number, CultureInfo.CurrentCulture, out var c) ? c : 0m;
+            var textoCosto = (Costo.Text ?? "").Trim();
+            decimal costo = 0m;
+            if (textoCosto.Length > 0 && (!decimal.TryParse(textoCosto, NumberStyles.Number, CultureInfo.CurrentCulture, out costo) || costo < 0))
+            {
+                Mostrar("El costo debe ser un número igual o mayor a 0");
+                return;
+            }
             var servicio = new RegistroServicio
             {
                 VehiculoId = v.Id,
@@ -124,7 +130,7 @@ namespace MotorCore_Garage.Pages
                 return;
             }
 
-            await DisplayAlertAsync("Servicio registrado", $"{trabajo} · {v.Placa}", "Listo");
+            await ModalPage.Aviso(this, "Servicio registrado", $"{trabajo} · {v.Placa}", "Listo");
             await Shell.Current.GoToAsync("..");
         }
 

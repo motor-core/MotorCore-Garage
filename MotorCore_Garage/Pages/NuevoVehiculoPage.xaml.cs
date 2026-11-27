@@ -44,9 +44,14 @@ namespace MotorCore_Garage.Pages
             var marca = (Marca.Text ?? "").Trim();
             var modelo = (Modelo.Text ?? "").Trim();
 
-            if (placa.Length < 5)
+            if (Taller.ErrorPlaca(placa) is { } errorPlaca)
             {
-                Mostrar("Escribe la placa");
+                Mostrar(errorPlaca);
+                return;
+            }
+            if (Taller.ErrorVin((Vin.Text ?? "").Trim()) is { } errorVin)
+            {
+                Mostrar(errorVin);
                 return;
             }
             if (Taller.PlacaRegistrada(placa))
@@ -81,7 +86,7 @@ namespace MotorCore_Garage.Pages
                 Vin = (Vin.Text ?? "").Trim().ToUpperInvariant()
             });
 
-            await DisplayAlertAsync("Vehículo registrado", $"{marca} {modelo} · {placa}", "Entendido");
+            await ModalPage.Aviso(this, "Vehículo registrado", $"{marca} {modelo} · {placa}", "Entendido");
             await Shell.Current.GoToAsync("..");
         }
 

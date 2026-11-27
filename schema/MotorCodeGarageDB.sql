@@ -14,18 +14,24 @@
 --
 -- Las relaciones (ClienteId, VehiculoId) se validan en la aplicación; no hay
 -- claves foráneas declaradas.
+-- Diagrama y descripción de cada tabla: docs/BASE_DE_DATOS.md
 -- =========================================================================
 
--- Cuentas de acceso. Rol: 0 = Administrador, 1 = Mecanico.
+-- Cuentas de acceso. Rol: 0 = Administrador, 1 = Mecanico, 2 = Cliente.
+-- ClienteId solo aplica a Rol = 2: cliente al que pertenece la cuenta (0 = ninguno).
 -- PasswordHash guarda "sal:hash" en Base64 (PBKDF2-SHA256, 100 000 iteraciones).
 CREATE TABLE IF NOT EXISTS Usuarios (
     Id           INTEGER PRIMARY KEY AUTOINCREMENT,
     Username     TEXT    NOT NULL UNIQUE,              -- en minúsculas, máx. 50
     PasswordHash TEXT    NOT NULL,
-    Rol          INTEGER NOT NULL DEFAULT 0
+    Rol          INTEGER NOT NULL DEFAULT 0,
+    ClienteId    INTEGER NOT NULL DEFAULT 0            -- Clientes.Id cuando Rol = 2
 );
 
--- Ajustes del taller (clave/valor). Claves usadas: NombreTaller, Bahias.
+-- Ajustes del taller (clave/valor). Claves usadas:
+--   NombreTaller  nombre del taller
+--   Bahias        número de bahías (1 a 10)
+--   WhatsApp      número del taller para citas por WhatsApp (con lada 52)
 CREATE TABLE IF NOT EXISTS Configuracion (
     Clave TEXT PRIMARY KEY,
     Valor TEXT NOT NULL
@@ -57,7 +63,7 @@ CREATE TABLE IF NOT EXISTS Vehiculos (
 CREATE TABLE IF NOT EXISTS ComponenteUltimo (
     Id          INTEGER PRIMARY KEY AUTOINCREMENT,
     VehiculoId  INTEGER NOT NULL,
-    Componente  TEXT    NOT NULL,
+    Componente  TEXT    NOT NULL,                     -- coincide con ComponentesCatalogo.Nombre
     KmUltimo    INTEGER NOT NULL,
     UNIQUE (VehiculoId, Componente)
 );
@@ -78,7 +84,7 @@ CREATE TABLE IF NOT EXISTS Citas (
     VehiculoId INTEGER NOT NULL,
     Servicio   TEXT    NOT NULL,
     Prioridad  INTEGER NOT NULL DEFAULT 0,
-    Estado     TEXT    NOT NULL DEFAULT 'Programada'   -- Programada, Recibido, En proceso, ...
+    Estado     TEXT    NOT NULL DEFAULT 'Programada'   -- Programada, Recibido, En proceso, Listo, Entregado
 );
 
 -- Servicios realizados. Componentes: lista separada por comas de los componentes atendidos.
@@ -92,6 +98,19 @@ CREATE TABLE IF NOT EXISTS HistorialServicios (
     Costo         NUMERIC NOT NULL DEFAULT 0,
     Mecanico      TEXT    NOT NULL DEFAULT '',
     Observaciones TEXT    NOT NULL DEFAULT ''
+);
+
+-- Mantenimientos que el cliente programa para su vehículo (por ejemplo, aceite cada 5,000 km o 6 meses).
+-- IntervaloKm = 0 o IntervaloMeses = 0 significa que ese criterio no aplica.
+CREATE TABLE IF NOT EXISTS Mantenimientos (
+    Id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    VehiculoId      INTEGER NOT NULL,
+    Nombre          TEXT    NOT NULL DEFAULT '',        -- máx. 80
+    IntervaloKm     INTEGER NOT NULL DEFAULT 0,
+    IntervaloMeses  INTEGER NOT NULL DEFAULT 0,
+    KmUltimo        INTEGER NOT NULL DEFAULT 0,         -- kilometraje de la última vez que se hizo
+    FechaUltima     TEXT    NOT NULL,                   -- fecha de la última vez que se hizo
+    UltimoAviso     TEXT    NOT NULL                    -- último día en que se notificó (DateTime.MinValue si nunca)
 );
 
 -- Bitácora de actividad del taller (inicios de sesión, registros, cambios).

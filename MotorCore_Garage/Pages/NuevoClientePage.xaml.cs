@@ -29,7 +29,7 @@ namespace MotorCore_Garage.Pages
             var cliente = new Cliente { Nombre = nombre, Telefono = telefono };
             Taller.AgregarCliente(cliente);
 
-            var registrarVehiculo = await DisplayAlertAsync("Cliente guardado", $"¿Registrar un vehículo de {nombre} ahora?",
+            var registrarVehiculo = await ModalPage.Confirmar(this, "Cliente guardado", $"¿Registrar un vehículo de {nombre} ahora?",
                 "Sí, registrar vehículo", "Más tarde");
 
             await Shell.Current.GoToAsync("..");

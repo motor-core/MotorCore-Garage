@@ -18,7 +18,7 @@ namespace MotorCore_Garage.Pages
             var modelo = Modelo.Text?.Trim() ?? "";
 
             var error =
-                placa.Length == 0 ? "Escribe la placa"
+                Taller.ErrorPlaca(placa) is { } errorPlaca ? errorPlaca
                 : Taller.PlacaRegistrada(placa) ? "Esa placa ya está registrada"
                 : marca.Length == 0 || modelo.Length == 0 ? "Escribe la marca y el modelo"
                 : !int.TryParse(Anio.Text, out var anio) || anio < 1950 || anio > DateTime.Today.Year + 1 ? "Revisa el año del vehículo"

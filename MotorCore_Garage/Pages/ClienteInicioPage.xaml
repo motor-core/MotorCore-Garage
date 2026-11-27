@@ -10,10 +10,12 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <VerticalStackLayout Style="{StaticResource Hero}">
-                <Label x:Name="Saludo" Style="{StaticResource HeroTitulo}" />
-                <Label x:Name="Resumen" Style="{StaticResource HeroSubtitulo}" />
-            </VerticalStackLayout>
+            <Grid BackgroundColor="{StaticResource Graphite}" HeightRequest="150" Padding="20,0">
+                <VerticalStackLayout VerticalOptions="Center" Spacing="4">
+                    <Label x:Name="Saludo" Style="{StaticResource HeroTitulo}" />
+                    <Label x:Name="Resumen" Style="{StaticResource HeroSubtitulo}" />
+                </VerticalStackLayout>
+            </Grid>
 
             <VerticalStackLayout Padding="16,20,16,32" Spacing="20">
 

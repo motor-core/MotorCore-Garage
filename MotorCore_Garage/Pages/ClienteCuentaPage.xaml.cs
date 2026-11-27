@@ -13,7 +13,7 @@ namespace MotorCore_Garage.Pages
         {
             base.OnAppearing();
             var cliente = Taller.ClientePorId(Taller.ClienteActualId);
-            NombreDelTaller.Text = Taller.NombreTaller;
+            NombreDelTaller.Text = "Motor Core";
             Nombre.Text = cliente?.Nombre ?? "—";
             Telefono.Text = cliente?.Telefono ?? "—";
             Usuario.Text = $"Usuario: {Taller.UsuarioActual}";
@@ -26,12 +26,12 @@ namespace MotorCore_Garage.Pages
         async void OnWhatsApp(object? sender, EventArgs e)
         {
             if (!await Vistas.AgendarCitaWhatsApp())
-                await DisplayAlertAsync("WhatsApp", "El número del taller aún no está configurado.", "OK");
+                await ModalPage.Aviso(this, "WhatsApp", "El número del taller aún no está configurado.");
         }
 
         async void OnCerrarSesion(object? sender, EventArgs e)
         {
-            var confirmar = await DisplayAlertAsync("Cerrar sesión", "¿Seguro que quieres salir?", "Salir", "Cancelar");
+            var confirmar = await ModalPage.Confirmar(this, "Cerrar sesión", "¿Seguro que quieres salir?", "Salir", "Cancelar");
             if (!confirmar) return;
             Taller.CerrarSesion();
             Navegacion.IrAlLogin();

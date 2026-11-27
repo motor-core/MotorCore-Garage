@@ -53,23 +53,23 @@ namespace MotorCore_Garage.Pages
         {
             if (_cliente is null) return;
 
-            var usuario = await DisplayPromptAsync("Cuenta del cliente", "Usuario para iniciar sesión", "Siguiente", "Cancelar",
+            var usuario = await ModalPage.Pedir(this, "Cuenta del cliente", "Usuario para iniciar sesión", "Siguiente", "Cancelar",
                 placeholder: "Ej. jramirez", maxLength: 50);
             if (string.IsNullOrWhiteSpace(usuario)) return;
 
-            var clave = await DisplayPromptAsync("Cuenta del cliente", "Contraseña (mínimo 6 caracteres)", "Crear cuenta", "Cancelar",
-                maxLength: 50);
+            var clave = await ModalPage.Pedir(this, "Cuenta del cliente", "Contraseña (mínimo 6 caracteres)", "Crear cuenta", "Cancelar",
+                maxLength: 50, esClave: true);
             if (string.IsNullOrWhiteSpace(clave)) return;
 
             var error = Taller.CrearAccesoCliente(_cliente.Id, usuario, clave);
             if (error is not null)
             {
-                await DisplayAlertAsync("No se pudo crear la cuenta", error, "OK");
+                await ModalPage.Aviso(this, "No se pudo crear la cuenta", error);
                 return;
             }
 
             BotonAcceso.IsVisible = false;
-            await DisplayAlertAsync("Cuenta creada", $"{_cliente.Nombre} ya puede entrar con el usuario «{usuario.Trim()}».", "OK");
+            await ModalPage.Aviso(this, "Cuenta creada", $"{_cliente.Nombre} ya puede entrar con el usuario «{usuario.Trim()}».");
         }
 
         async void OnVolver(object? sender, EventArgs e)

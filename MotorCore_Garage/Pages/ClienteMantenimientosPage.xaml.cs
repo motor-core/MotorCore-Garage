@@ -84,13 +84,13 @@ namespace MotorCore_Garage.Pages
 
         async Task MarcarHecho(Mantenimiento m, Vehiculo vehiculo)
         {
-            var texto = await DisplayPromptAsync("Marcar como hecho", "Kilometraje al momento del servicio", "Guardar", "Cancelar",
-                placeholder: vehiculo.KmActual.ToString(), initialValue: vehiculo.KmActual.ToString(), keyboard: Keyboard.Numeric);
+            var texto = await ModalPage.Pedir(this, "Marcar como hecho", "Kilometraje al momento del servicio", "Guardar", "Cancelar",
+                placeholder: vehiculo.KmActual.ToString(), valorInicial: vehiculo.KmActual.ToString(), teclado: Keyboard.Numeric);
             if (texto is null) return;
 
             if (!int.TryParse(texto.Trim(), out var km) || km < vehiculo.KmActual)
             {
-                await DisplayAlertAsync("Kilometraje no válido", $"Escribe un número igual o mayor a {vehiculo.KmActual:N0} km.", "OK");
+                await ModalPage.Aviso(this, "Kilometraje no válido", $"Escribe un número igual o mayor a {vehiculo.KmActual:N0} km.");
                 return;
             }
 
@@ -100,7 +100,7 @@ namespace MotorCore_Garage.Pages
 
         async Task Eliminar(Mantenimiento m)
         {
-            var confirmar = await DisplayAlertAsync("Eliminar mantenimiento", $"¿Eliminar «{m.Nombre}»? Ya no recibirás avisos de este servicio.", "Eliminar", "Cancelar");
+            var confirmar = await ModalPage.Confirmar(this, "Eliminar mantenimiento", $"¿Eliminar «{m.Nombre}»? Ya no recibirás avisos de este servicio.", "Eliminar", "Cancelar");
             if (!confirmar) return;
             Taller.EliminarMantenimiento(m);
             Mostrar();

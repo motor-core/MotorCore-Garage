@@ -4,7 +4,7 @@ Sistema de gestión de mantenimiento automotriz para talleres. Lleva el control 
 
 La app funciona **sin conexión**: todos los datos se guardan en una base de datos SQLite dentro del teléfono.
 
-> **Estado del proyecto:** primera versión funcional en modo local. Incluye registro inicial, inicio de sesión, alta de clientes, vehículos y servicios, agenda y alertas de mantenimiento. Ver [Estado actual y hoja de ruta](#estado-actual-y-hoja-de-ruta).
+> **Estado del proyecto:** primera versión funcional en modo local. Incluye registro inicial del taller, inicio de sesión para monitoreo y para cliente, registro de clientes, alta de clientes, vehículos y servicios, agenda, alertas de mantenimiento y la vista de cliente con sus vehículos, mantenimientos y citas. Los monitores entran con Firebase cuando hay conexión. Ver [Estado actual y hoja de ruta](#estado-actual-y-hoja-de-ruta).
 
 ---
 
@@ -31,7 +31,19 @@ La navegación principal está en la barra de pestañas inferior.
 
 ### Acceso
 - **Registro inicial:** en el primer uso se crea el taller (nombre) y la cuenta de administrador (usuario y contraseña de al menos 6 caracteres). Entra directamente a la app.
-- **Inicio de sesión:** usuario y contraseña. Las contraseñas se guardan con PBKDF2-SHA256 y sal, nunca en texto plano.
+- **Entrar / Registrarse:** la pantalla de entrada tiene un interruptor para elegir entre iniciar sesión y registrarse como cliente.
+- **Entrar como Monitor o Cliente:** el interruptor indica qué tipo de cuenta usas. Si la cuenta no coincide con el tipo elegido, la app lo indica.
+- **Registro de cliente:** crea el cliente y su cuenta de acceso, y entra directamente como cliente.
+- **Contraseñas:** se guardan con PBKDF2-SHA256 y sal, nunca en texto plano. Los monitores entran con Firebase Authentication cuando hay conexión; si no, con la cuenta guardada en el teléfono.
+
+### Vista de cliente
+Un cliente que entra ve su propia sección, con cuatro pestañas:
+- **Inicio:** saludo, cifras rápidas y sus mantenimientos pendientes.
+- **Vehículos:** sus vehículos, con registro de nuevos vehículos.
+- **Citas:** sus citas próximas y pasadas (solo lectura). Puede agendar por WhatsApp al número del taller.
+- **Cuenta:** nombre, teléfono, usuario y cierre de sesión.
+
+Los mantenimientos del cliente se programan por kilometraje, por meses o por ambos. Al marcar uno como hecho, se reinicia su periodo.
 
 ### Inicio
 - Saludo, fecha y resumen del día: citas de hoy, vehículos en taller, alertas urgentes y ocupación de bahías.
@@ -138,15 +150,18 @@ Los datos quedan en el teléfono. Desinstalar la app o borrar sus datos elimina 
 
 | Tabla | Contenido |
 |---|---|
-| `Usuarios` | Cuentas de acceso (usuario, hash de contraseña, rol) |
-| `Configuracion` | Nombre del taller y número de bahías |
+| `Usuarios` | Cuentas de acceso de monitoreo y de cliente (usuario, hash de contraseña, rol) |
+| `Configuracion` | Nombre del taller, número de bahías y número de WhatsApp |
 | `Clientes` | Nombre y teléfono de cada cliente |
 | `Vehiculos` | Datos del vehículo, propietario y kilometraje actual |
 | `ComponenteUltimo` | Kilometraje del último servicio por componente y vehículo |
 | `ComponentesCatalogo` | Componentes y su intervalo de servicio en km |
 | `Citas` | Agenda de servicios |
 | `HistorialServicios` | Servicios realizados |
+| `Mantenimientos` | Mantenimientos programados por el cliente para cada vehículo |
 | `Bitacora` | Registro de actividad |
+
+El diagrama entidad-relación, el flujo de datos y los valores de cada campo están en [docs/BASE_DE_DATOS.md](docs/BASE_DE_DATOS.md).
 
 Para reiniciar la base de datos durante el desarrollo, desinstala la app del emulador o borra sus datos.
 
@@ -159,25 +174,34 @@ MotorCore-Garage/
 ├── .gitignore                       Archivos generados e IDE excluidos de git
 ├── MotorCore_Garage.slnx            Solución
 ├── README.md
+├── docs/
+│   ├── BASE_DE_DATOS.md             Diagramas y tablas de la base de datos
+│   └── REQUISITOS.md                Requerimientos funcionales y no funcionales
 ├── schema/
 │   └── MotorCodeGarageDB.sql        Esquema SQLite de la base de datos local
 ├── .vscode/settings.json            Configuración de VS Code
 └── MotorCore_Garage/
     ├── App.xaml / App.xaml.cs       Punto de entrada (arranca con Splash)
-    ├── AppShell.xaml / .cs          Shell: pestañas y registro de rutas
+    ├── AppShell.xaml / .cs          Shell de monitoreo: pestañas y registro de rutas
+    ├── ClienteShell.xaml / .cs      Shell de la vista de cliente
     ├── MauiProgram.cs               Configuración de la app y fuentes
     ├── MotorCore_Garage.csproj      Proyecto MAUI (targets, versiones, paquetes)
     ├── Models/
     │   └── Modelos.cs               Entidades de la base de datos y modelos de presentación
     ├── Services/
     │   ├── Db.cs                    Conexión SQLite y creación de tablas
+    │   ├── FirebaseSesion.cs        Inicio de sesión de monitores con Firebase
+    │   ├── Navegacion.cs            Cambio entre la app de monitoreo, cliente y login
+    │   ├── Notificaciones.cs        Avisos de mantenimientos próximos o vencidos
     │   ├── Seguridad.cs             Hash y verificación de contraseñas
     │   ├── Taller.cs                Lógica de negocio y acceso a datos
     │   └── Ui.cs                    Chips, colores de desgaste y avisos
     ├── Pages/
     │   ├── SplashPage               Arranque; decide entre registro e inicio de sesión
     │   ├── RegistroPage             Registro inicial del taller
-    │   ├── LoginPage                Inicio de sesión
+    │   ├── LoginPage                Entrar / Registrarse y selector Monitor / Cliente
+    │   ├── ModalPage                Avisos, confirmaciones y cuadros para escribir (con bordes redondeados)
+    │   ├── Cliente*Page             Pantallas de la vista de cliente (inicio, vehículos, citas, cuenta, mantenimientos)
     │   ├── InicioPage               Resumen del día y acciones rápidas
     │   ├── VehiculosPage            Listado de vehículos
     │   ├── ExpedientePage           Detalle y estado de un vehículo
@@ -267,6 +291,10 @@ Los estilos respetan el modo claro y oscuro del sistema mediante `AppThemeBindin
 - [x] Compilación para Android verificada.
 - [x] Alta y eliminación de cuentas de mecánico desde *Más → Equipo* (solo administrador).
 - [x] Cabecera unificada en todas las pantallas y estados vacíos en las listas.
+- [x] Vista de cliente: inicio, vehículos, citas, cuenta y mantenimientos programados.
+- [x] Registro de cliente desde la pantalla de entrada, con su cuenta de acceso.
+- [x] Inicio de sesión de monitores con Firebase Authentication y rol en Firestore (con respaldo local sin conexión).
+- [x] Avisos, confirmaciones y cuadros para escribir con bordes redondeados (`ModalPage`).
 
 ### Pendiente
 - [ ] Probar el flujo completo en dispositivo (registro, login, cliente, vehículo, servicio).
@@ -274,6 +302,7 @@ Los estilos respetan el modo claro y oscuro del sistema mediante `AppThemeBindin
 - [ ] Mantener la cabecera visible cuando se abre el teclado en formularios.
 - [ ] Pestañas de estado y órdenes de trabajo.
 - [ ] Reportes con datos reales.
+- [ ] Sincronizar clientes, vehículos, servicios y citas con Firestore (hoy solo se sincronizan las cuentas de monitoreo).
 - [ ] Sincronización con un servidor (opcional, para varios equipos).
 - [ ] Proyecto de pruebas unitarias para `Taller` y el cálculo de desgaste.
 - [ ] Capturas de pantalla en `docs/img/`.
