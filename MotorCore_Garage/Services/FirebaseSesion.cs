@@ -49,6 +49,27 @@ namespace MotorCore_Garage.Services
             }
         }
 
+        // Crea la cuenta de administrador en Firebase y su rol en Firestore. Firebase deja la sesión iniciada con la cuenta nueva.
+        // Sin conexión, o si el correo ya tiene cuenta en Firebase, la cuenta queda solo en este teléfono.
+        public static async Task<ResultadoCuenta> CrearAdministradorAsync(string usuario, string clave)
+        {
+            try
+            {
+                var nuevo = await CrossFirebaseAuth.Current.CreateUserAsync(CorreoDe(usuario), clave);
+                await CrossFirebaseFirestore.Current
+                    .GetDocument($"usuarios/{nuevo.Uid}")
+                    .SetDataAsync(new Dictionary<object, object> { ["usuario"] = usuario.Trim().ToLowerInvariant(), ["rol"] = "admin" });
+                return ResultadoCuenta.Creada;
+            }
+            catch (Exception ex)
+            {
+                // Firebase responde con el código email-already-in-use cuando el correo ya tiene cuenta.
+                return ex.Message.Contains("email-already-in-use", StringComparison.OrdinalIgnoreCase)
+                    ? ResultadoCuenta.YaExiste
+                    : ResultadoCuenta.SinConexion;
+            }
+        }
+
         // Crea la cuenta de un mecánico en Firebase y su rol en Firestore.
         // Firebase inicia sesión con la cuenta nueva, así que se vuelve a entrar como el administrador.
         public static async Task<bool> CrearMecanicoAsync(string usuario, string clave, string adminUsuario, string adminClave)
@@ -73,6 +94,9 @@ namespace MotorCore_Garage.Services
             }
         }
     }
+
+    // Resultado de crear una cuenta en Firebase: se creó, el correo ya tenía cuenta, o no hubo conexión.
+    public enum ResultadoCuenta { Creada, YaExiste, SinConexion }
 
     // Documento de usuarios/{uid} en Firestore.
     public class UsuarioFirebase

@@ -14,9 +14,10 @@ namespace MotorCore_Garage.Services
         public static string UsuarioActual { get; private set; } = "";
         public static int ClienteActualId { get; private set; }
         public static bool EsCliente => RolActual == Rol.Cliente;
-        public const string NombrePorDefecto = "MotorCode Garage";
+        public const string NombrePorDefecto = "Taller Mecánico Sánchez";
         // Número de WhatsApp del taller con código de país y sin "+" (ej. 5215512345678). Vacío = botón deshabilitado.
-        public const string WhatsAppEmpresa = "524624804230";
+        // Número de WhatsApp del taller para las citas, con lada de país (52...). Lo edita el administrador.
+        public static string WhatsAppEmpresa { get; private set; } = "524624804230";
         public static string NombreTaller { get; private set; } = NombrePorDefecto;
 
         static int _bahias = 4;
@@ -61,18 +62,23 @@ namespace MotorCore_Garage.Services
             var config = db.Table<Configuracion>().ToList();
             if (int.TryParse(config.FirstOrDefault(c => c.Clave == "Bahias")?.Valor, out var bahias)) _bahias = bahias;
             NombreTaller = config.FirstOrDefault(c => c.Clave == "NombreTaller")?.Valor is { Length: > 0 } nombre ? nombre : NombrePorDefecto;
+            if (config.FirstOrDefault(c => c.Clave == "WhatsApp")?.Valor is { Length: > 0 } whats) WhatsAppEmpresa = whats;
         }
 
         public static bool HayCuentas() => Db.Conexion.Table<Usuario>().Any();
 
-        // Registro inicial: crea el taller y la cuenta de administrador, y deja la sesión iniciada.
-        public static string? CrearCuentaInicial(string nombreTaller, string usuario, string clave)
+        // true si el registro inicial encontró que el correo del administrador ya tenía cuenta en Firebase.
+        public static bool CorreoYaRegistrado { get; private set; }
+
+        // Registro inicial: crea el taller y la cuenta de administrador (local y, si hay conexión, en Firebase),
+        // y deja la sesión iniciada.
+        public static async Task<string?> CrearCuentaInicial(string usuario, string clave)
         {
             if (HayCuentas()) return "Ya existe una cuenta registrada";
             var db = Db.Conexion;
             db.RunInTransaction(() =>
             {
-                GuardarConfig("NombreTaller", nombreTaller);
+                GuardarConfig("NombreTaller", NombrePorDefecto);
                 db.Insert(new Usuario
                 {
                     Username = usuario.ToLowerInvariant(),
@@ -80,10 +86,23 @@ namespace MotorCore_Garage.Services
                     Rol = Rol.Administrador
                 });
             });
-            NombreTaller = nombreTaller;
+            NombreTaller = NombrePorDefecto;
             Iniciar(usuario.ToLowerInvariant(), Rol.Administrador);
             ClaveSesion = clave;
             Bitacorar("Taller registrado · cuenta de administrador creada");
+            switch (await FirebaseSesion.CrearAdministradorAsync(usuario.ToLowerInvariant(), clave))
+            {
+                case ResultadoCuenta.Creada:
+                    Bitacorar("cuenta de administrador creada en Firebase");
+                    break;
+                case ResultadoCuenta.YaExiste:
+                    CorreoYaRegistrado = true;
+                    Bitacorar("el correo de administrador ya tenía cuenta en Firebase");
+                    break;
+                default:
+                    Bitacorar("cuenta de administrador quedó solo en este teléfono (sin conexión a Firebase)");
+                    break;
+            }
             return null;
         }
 
@@ -109,7 +128,13 @@ namespace MotorCore_Garage.Services
             }
 
             var error = Autenticar(usuario, clave, esCliente: false);
-            if (error is null) ClaveSesion = clave;
+            if (error is null)
+            {
+                ClaveSesion = clave;
+                // La cuenta de administrador se creó sin conexión: al entrar con conexión se completa en Firebase.
+                if (RolActual == Rol.Administrador && await FirebaseSesion.CrearAdministradorAsync(UsuarioActual, clave) == ResultadoCuenta.Creada)
+                    Bitacorar("cuenta de administrador creada en Firebase");
+            }
             return error;
         }
 
@@ -153,7 +178,7 @@ namespace MotorCore_Garage.Services
         {
             var nombre = usuario.Trim().ToLowerInvariant();
             if (ClientePorId(clienteId) is null) return "Cliente no encontrado";
-            if (nombre.Length < 3) return "El usuario debe tener al menos 3 caracteres";
+            if (ErrorUsuario(nombre) is { } errorUsuario) return errorUsuario;
             if (clave.Length < 6) return "La contraseña debe tener al menos 6 caracteres";
             if (TieneAcceso(clienteId)) return "Este cliente ya tiene una cuenta de acceso";
             if (Db.Conexion.Table<Usuario>().Any(u => u.Username == nombre)) return "Ese usuario ya existe";
@@ -182,7 +207,7 @@ namespace MotorCore_Garage.Services
         public static async Task<string?> CrearCuentaMecanicoAsync(string usuario, string clave)
         {
             var nombre = usuario.Trim().ToLowerInvariant();
-            if (nombre.Length < 3) return "El usuario debe tener al menos 3 caracteres";
+            if (ErrorUsuario(nombre) is { } errorUsuario) return errorUsuario;
             if (clave.Length < 6) return "La contraseña debe tener al menos 6 caracteres";
             if (Db.Conexion.Table<Usuario>().Any(u => u.Username == nombre)) return "Ese usuario ya existe";
 
@@ -207,6 +232,91 @@ namespace MotorCore_Garage.Services
             Db.Conexion.Delete<Usuario>(cuenta.Id);
             Bitacorar($"eliminó la cuenta de mecánico «{cuenta.Username}»");
             return null;
+        }
+
+        // Cambia el usuario y, si se escribe, la contraseña de un mecánico. Una clave vacía conserva la actual.
+        public static string? EditarCuentaMecanico(Usuario cuenta, string usuario, string? clave)
+        {
+            if (RolActual != Rol.Administrador) return "Solo el administrador puede editar cuentas";
+            if (cuenta.Rol != Rol.Mecanico) return "Solo se pueden editar cuentas de mecánico";
+
+            var nombre = usuario.Trim().ToLowerInvariant();
+            if (ErrorUsuario(nombre) is { } errorUsuario) return errorUsuario;
+            if (!string.IsNullOrEmpty(clave) && clave.Length < 6) return "La contraseña debe tener al menos 6 caracteres";
+            if (Db.Conexion.Table<Usuario>().Any(u => u.Username == nombre && u.Id != cuenta.Id)) return "Ese usuario ya existe";
+
+            var anterior = cuenta.Username;
+            cuenta.Username = nombre;
+            if (!string.IsNullOrEmpty(clave)) cuenta.PasswordHash = Seguridad.Generar(clave);
+            Db.Conexion.Update(cuenta);
+            Bitacorar(anterior == nombre
+                ? $"editó la cuenta de mecánico «{nombre}»"
+                : $"cambió el usuario de mecánico «{anterior}» a «{nombre}»");
+            return null;
+        }
+
+        // Solo el administrador cambia el número. Acepta 10 dígitos (se agrega 52) o el número completo con 52.
+        public static string? GuardarWhatsApp(string entrada)
+        {
+            if (RolActual != Rol.Administrador) return "Solo el administrador puede cambiar el número";
+
+            var digitos = new string(entrada.Where(char.IsDigit).ToArray());
+            var numero = digitos.Length == 10 ? "52" + digitos : digitos;
+            if (numero.Length != 12 || !numero.StartsWith("52")) return "Escribe un número de 10 dígitos de México";
+
+            GuardarConfig("WhatsApp", numero);
+            WhatsAppEmpresa = numero;
+            Bitacorar($"cambió el número de WhatsApp de citas a {numero}");
+            return null;
+        }
+
+        // Validaciones compartidas de los formularios. Devuelven el mensaje de error, o null si el dato es válido.
+        public static string? ErrorUsuario(string usuario)
+        {
+            var n = usuario.Trim().ToLowerInvariant();
+            return n.Length < 3 ? "El usuario debe tener al menos 3 caracteres"
+                : n.Length > 50 ? "El usuario no puede tener más de 50 caracteres"
+                : !n.All(ch => char.IsLetterOrDigit(ch) || ch is '.' or '_' or '-') ? "El usuario solo puede tener letras, números, punto, guion o guion bajo"
+                : null;
+        }
+
+        public static string? ErrorPlaca(string placa)
+        {
+            var p = placa.Trim().ToUpperInvariant();
+            return p.Length < 5 ? "La placa debe tener al menos 5 caracteres"
+                : p.Length > 15 ? "La placa no puede tener más de 15 caracteres"
+                : !p.All(ch => char.IsLetterOrDigit(ch) || ch == '-') ? "La placa solo puede tener letras, números y guiones"
+                : null;
+        }
+
+        // El VIN es opcional; si se escribe, son 17 caracteres alfanuméricos sin I, O ni Q.
+        public static string? ErrorVin(string vin)
+        {
+            var v = vin.Trim().ToUpperInvariant();
+            if (v.Length == 0) return null;
+            return v.Length != 17 ? "El VIN debe tener 17 caracteres"
+                : !v.All(char.IsLetterOrDigit) || v.Any(ch => ch is 'I' or 'O' or 'Q') ? "El VIN solo puede tener letras y números, sin I, O ni Q"
+                : null;
+        }
+
+        // Registro del cliente desde la pantalla de entrada: crea el cliente y su cuenta de acceso.
+        // Todo se valida antes de guardar, para no dejar un cliente sin usuario.
+        public static string? CrearClienteConAcceso(string nombre, string telefono, string usuario, string clave)
+        {
+            var nombreLimpio = nombre.Trim();
+            var nombreUsuario = usuario.Trim().ToLowerInvariant();
+            var error =
+                nombreLimpio.Length == 0 ? "Escribe tu nombre"
+                : telefono.Length != 10 || !telefono.All(char.IsDigit) ? "El teléfono debe tener 10 dígitos"
+                : ErrorUsuario(nombreUsuario) is { } errorUsuario ? errorUsuario
+                : clave.Length < 6 ? "La contraseña debe tener al menos 6 caracteres"
+                : Db.Conexion.Table<Usuario>().Any(u => u.Username == nombreUsuario) ? "Ese usuario ya existe"
+                : null;
+            if (error is not null) return error;
+
+            var cliente = new Cliente { Nombre = nombreLimpio, Telefono = telefono };
+            AgregarCliente(cliente);
+            return CrearAccesoCliente(cliente.Id, nombreUsuario, clave);
         }
 
         // ---------- Mantenimientos del cliente ----------
@@ -340,10 +450,66 @@ namespace MotorCore_Garage.Services
             v.UltimoServicioKm[componente] = km;
         }
 
-        public static void AgregarCita(Cita cita)
+        // Valida el turno de una cita: día y hora no pasados, hora de la lista y bahía libre.
+        // excluirId es la cita que se está moviendo, para que no cuente contra sí misma.
+        public static string? ErrorCita(DateTime inicio, int? excluirId = null)
         {
+            if (inicio.Date < DateTime.Today) return "No puedes agendar en un día que ya pasó";
+            if (inicio <= DateTime.Now) return "Ese horario ya pasó. Elige otro turno";
+            if (!Horarios.Any(h => int.Parse(h[..2]) == inicio.Hour)) return "Elige un turno de la lista";
+            if (HorarioLleno(inicio, $"{inicio.Hour:00}:00", excluirId)) return "Ese turno ya está lleno";
+            return null;
+        }
+
+        // Guarda una cita nueva. Un cliente solo puede agendar para sus propios vehículos, y su cita queda
+        // como solicitud hasta que el taller la confirme. El turno ya cuenta como ocupado.
+        public static string? AgregarCita(Cita cita)
+        {
+            if (EsCliente && cita.ClienteId != ClienteActualId) return "Esa cita no es tuya";
+            if (ErrorCita(cita.Fecha) is { } error) return error;
+            if (EsCliente) cita.Estado = "Solicitada";
             Db.Conexion.Insert(cita);
             Citas.Add(cita);
+            return null;
+        }
+
+        // El taller confirma una solicitud del cliente: pasa a Programada.
+        public static string? ConfirmarCita(Cita cita)
+        {
+            if (cita.Estado != "Solicitada" || cita.Fecha <= DateTime.Now) return "Esta cita ya no se puede confirmar";
+            cita.Estado = "Programada";
+            GuardarCita(cita);
+            Bitacorar($"confirmó la cita de {cita.Servicio} del {cita.Fecha:dd/MM HH:mm}");
+            return null;
+        }
+
+        // Una cita se puede cambiar o cancelar mientras esté pendiente o programada y todavía no empiece.
+        // Un cliente solo puede tocar sus propias citas.
+        static string? ErrorModificarCita(Cita cita)
+        {
+            if (EsCliente && cita.ClienteId != ClienteActualId) return "Esa cita no es tuya";
+            if (cita.Estado is not ("Programada" or "Solicitada") || cita.Fecha <= DateTime.Now) return "Esta cita ya no se puede modificar";
+            return null;
+        }
+
+        public static string? CancelarCita(Cita cita)
+        {
+            if (ErrorModificarCita(cita) is { } error) return error;
+            cita.Estado = "Cancelada";
+            GuardarCita(cita);
+            Bitacorar($"canceló la cita de {cita.Servicio} del {cita.Fecha:dd/MM HH:mm}");
+            return null;
+        }
+
+        public static string? PosponerCita(Cita cita, DateTime nueva)
+        {
+            if (ErrorModificarCita(cita) is { } error) return error;
+            if (ErrorCita(nueva, cita.Id) is { } errorTurno) return errorTurno;
+            var anterior = cita.Fecha;
+            cita.Fecha = nueva;
+            GuardarCita(cita);
+            Bitacorar($"pospuso la cita de {cita.Servicio} del {anterior:dd/MM HH:mm} al {nueva:dd/MM HH:mm}");
+            return null;
         }
 
         public static void GuardarCita(Cita cita) => Db.Conexion.Update(cita);
@@ -386,7 +552,7 @@ namespace MotorCore_Garage.Services
             {
                 var cliente = ClientePorId(v.ClienteId);
                 if (cliente is null) continue;
-                var tieneCita = Citas.Any(c => c.VehiculoId == v.Id && c.Fecha >= DateTime.Today);
+                var tieneCita = Citas.Any(c => c.VehiculoId == v.Id && c.Fecha >= DateTime.Today && c.Estado != "Cancelada");
                 foreach (var e in Estados(v).Where(e => e.Estado != Desgaste.Ok))
                 {
                     var grupo = tieneCita ? GrupoAlerta.Programadas : e.Estado == Desgaste.Vencido ? GrupoAlerta.Vencidas : GrupoAlerta.Proximas;
@@ -408,15 +574,16 @@ namespace MotorCore_Garage.Services
         public static List<RegistroServicio> Historial(Vehiculo v) =>
             Servicios.Where(s => s.VehiculoId == v.Id).OrderByDescending(s => s.Fecha).ToList();
 
-        public static int CitasEn(DateTime dia) => Citas.Count(c => c.Fecha.Date == dia.Date);
+        // Las citas canceladas no ocupan bahía ni cuentan en la ocupación del día.
+        public static int CitasEn(DateTime dia) => Citas.Count(c => c.Fecha.Date == dia.Date && c.Estado != "Cancelada");
 
-        public static int CitasEnHorario(DateTime fecha, string hora)
+        public static int CitasEnHorario(DateTime fecha, string hora, int? excluirId = null)
         {
             var h = int.Parse(hora.Substring(0, 2));
-            return Citas.Count(c => c.Fecha.Date == fecha.Date && c.Fecha.Hour == h);
+            return Citas.Count(c => c.Fecha.Date == fecha.Date && c.Fecha.Hour == h && c.Estado != "Cancelada" && c.Id != excluirId);
         }
 
-        public static bool HorarioLleno(DateTime fecha, string hora) => CitasEnHorario(fecha, hora) >= Bahias;
+        public static bool HorarioLleno(DateTime fecha, string hora, int? excluirId = null) => CitasEnHorario(fecha, hora, excluirId) >= Bahias;
 
         // Ocupación del día como fracción de todas las bahías y horarios disponibles.
         public static double Saturacion(DateTime dia) => Math.Min(1.0, CitasEn(dia) / (double)(Horarios.Length * Bahias));

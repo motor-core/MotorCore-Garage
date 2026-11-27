@@ -1,4 +1,6 @@
 using Microsoft.Maui.Graphics;
+using MauiIcons.Core;
+using MauiIcons.Material;
 using MotorCore_Garage.Models;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -8,6 +10,19 @@ namespace MotorCore_Garage.Services
     public static class Ui
     {
         public static Color Recurso(string clave) => (Color)Application.Current!.Resources[clave];
+
+        // Botón de ojo junto a un campo de contraseña: alterna entre ocultar y mostrar lo escrito.
+        public static void ConectarVerClave(Entry campo, Button boton)
+        {
+            void Pintar() => boton.ImageSource = (campo.IsPassword ? MaterialIcons.Visibility : MaterialIcons.VisibilityOff)
+                .ToImageSource(Recurso("InkMuted"), 22);
+            Pintar();
+            boton.Clicked += (_, _) =>
+            {
+                campo.IsPassword = !campo.IsPassword;
+                Pintar();
+            };
+        }
 
         public static Border Chip(string texto, Color fondo, Color letra, string? icono = null)
         {
