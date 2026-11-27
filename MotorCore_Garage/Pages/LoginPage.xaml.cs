@@ -4,41 +4,70 @@ namespace MotorCore_Garage.Pages
 {
     public partial class LoginPage : ContentPage
     {
-        // Tipo de acceso elegido: false = monitoreo del taller, true = cliente.
+        // Tipo de acceso elegido al entrar: false = monitoreo del taller, true = cliente.
         bool _cliente;
 
         public LoginPage()
         {
             InitializeComponent();
+            Ui.ConectarVerClave(Contrasena, VerContrasena);
+            Ui.ConectarVerClave(ClaveNueva, VerClaveNueva);
+            Ui.ConectarVerClave(ConfirmarNueva, VerConfirmarNueva);
             Seleccionar(false);
+            VerEntrar();
         }
 
-        protected override void OnAppearing()
+        // Selector Entrar / Registrarse.
+        void OnVerEntrar(object? sender, EventArgs e) => VerEntrar();
+
+        void OnVerRegistro(object? sender, EventArgs e) => VerRegistro();
+
+        void VerEntrar()
         {
-            base.OnAppearing();
-            Encabezado.Text = Taller.NombreTaller;
+            PanelEntrar.IsVisible = true;
+            PanelOpcionesEntrar.IsVisible = true;
+            PanelRegistro.IsVisible = false;
+            EstiloOpcion(OpcionEntrar, true);
+            EstiloOpcion(OpcionRegistrar, false);
+            Error.IsVisible = false;
+        }
+
+        void VerRegistro()
+        {
+            PanelEntrar.IsVisible = false;
+            PanelRegistro.IsVisible = true;
+            PanelOpcionesEntrar.IsVisible = false;
+            EstiloOpcion(OpcionEntrar, false);
+            EstiloOpcion(OpcionRegistrar, true);
+            Error.IsVisible = false;
         }
 
         void OnModoMonitor(object? sender, EventArgs e) => Seleccionar(false);
 
         void OnModoCliente(object? sender, EventArgs e) => Seleccionar(true);
 
+        // Interruptor Monitor / Cliente: la opción activa se rellena con el color principal.
+        static void EstiloOpcion(Border opcion, bool activa)
+        {
+            var etiqueta = (Label)opcion.Content!;
+            var recursos = Application.Current!.Resources;
+
+            opcion.BackgroundColor = activa ? (Color)recursos["Primary"] : Colors.Transparent;
+            etiqueta.TextColor = (Color)recursos[activa ? "White" : "Gray400"];
+            etiqueta.FontAttributes = activa ? FontAttributes.Bold : FontAttributes.None;
+        }
+
         void Seleccionar(bool cliente)
         {
             _cliente = cliente;
-            Ui.EstiloSeleccion(BotonModoMonitor, !cliente);
-            Ui.EstiloSeleccion(BotonModoCliente, cliente);
+            EstiloOpcion(OpcionMonitor, !cliente);
+            EstiloOpcion(OpcionCliente, cliente);
             AyudaModo.Text = cliente
-                ? "Usa la cuenta que el taller creó para ti, o crea la tuya."
+                ? "Usa la cuenta que creaste o la que el taller te dio."
                 : "Para administradores y mecánicos del taller.";
-            SeccionCuentaCliente.IsVisible = cliente;
             Error.IsVisible = false;
         }
 
-        void OnMostrarChanged(object? sender, CheckedChangedEventArgs e)
-        {
-            Contrasena.IsPassword = !e.Value;
-        }
 
         async void OnEntrar(object? sender, EventArgs e)
         {
@@ -64,10 +93,27 @@ namespace MotorCore_Garage.Pages
             Navegacion.IrAlInicio();
         }
 
-        // Registro de cliente: se abre sobre esta pantalla y regresa aquí si ya hay cuenta.
-        async void OnCrearCuenta(object? sender, EventArgs e)
+        // Cliente nuevo: crea el cliente y su cuenta, y entra directo como cliente.
+        void OnRegistrar(object? sender, EventArgs e)
         {
-            await Navigation.PushAsync(new RegistroPage());
+            var usuario = UsuarioNuevo.Text?.Trim() ?? "";
+            var clave = ClaveNueva.Text ?? "";
+
+            if (clave != (ConfirmarNueva.Text ?? ""))
+            {
+                Mostrar("Las contraseñas no coinciden");
+                return;
+            }
+
+            var error = Taller.CrearClienteConAcceso(NombreCliente.Text ?? "", Telefono.Text?.Trim() ?? "", usuario, clave);
+            if (error is not null)
+            {
+                Mostrar(error);
+                return;
+            }
+
+            Taller.Autenticar(usuario, clave, esCliente: true);
+            Navegacion.IrAlInicio();
         }
 
         async void OnAgendarWhatsApp(object? sender, EventArgs e)

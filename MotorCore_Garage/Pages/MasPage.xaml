@@ -67,6 +67,17 @@
                     <VerticalStackLayout x:Name="Catalogo" Spacing="12" />
                 </Border>
 
+                <!-- WhatsApp para citas -->
+                <Label Text="WhatsApp para citas" Style="{StaticResource Seccion}" />
+                <Border Style="{StaticResource Tarjeta}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Número del taller (10 dígitos)" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="NumeroWhatsApp" Style="{StaticResource Campo}" Placeholder="Ej. 4624804230" Keyboard="Telephone" MaxLength="16" />
+                        <Button x:Name="BotonGuardarWhatsApp" Text="Guardar número" Style="{StaticResource BotonPrimario}" Clicked="OnGuardarWhatsApp" />
+                        <Label x:Name="AyudaWhatsApp" Style="{StaticResource Pie}" />
+                    </VerticalStackLayout>
+                </Border>
+
                 <!-- Datos y sesión -->
                 <Label Text="Datos" Style="{StaticResource Seccion}" />
                 <Border Style="{StaticResource Tarjeta}" Padding="0">

@@ -9,7 +9,7 @@
         <VerticalStackLayout Spacing="0">
 
             <VerticalStackLayout Style="{StaticResource Hero}" Padding="24,56,24,24">
-                <GraphicsView x:Name="Logo" HeightRequest="64" WidthRequest="64" HorizontalOptions="Start" Margin="0,0,0,12" />
+                <Image Source="logo.svg" HeightRequest="64" WidthRequest="64" HorizontalOptions="Start" Margin="0,0,0,12" />
                 <Label x:Name="Titulo" Style="{StaticResource HeroTitulo}" />
                 <Label x:Name="Subtitulo" Style="{StaticResource HeroSubtitulo}" />
             </VerticalStackLayout>
@@ -25,12 +25,6 @@
                     </Grid>
                     <Label x:Name="AyudaModo" Style="{StaticResource Pie}" />
 
-                    <!-- Monitor: datos del taller -->
-                    <VerticalStackLayout x:Name="CampoTaller" Spacing="12">
-                        <Label Text="Nombre del taller" Style="{StaticResource Etiqueta}" />
-                        <Entry x:Name="NombreTaller" Style="{StaticResource Campo}" Placeholder="Ej. Taller Ramírez" ReturnType="Next" />
-                    </VerticalStackLayout>
-
                     <!-- Cliente: el taller debe haberte dado de alta antes -->
                     <VerticalStackLayout x:Name="CampoCliente" Spacing="12" IsVisible="False">
                         <Label Text="Tu nombre en el taller" Style="{StaticResource Etiqueta}" />
@@ -41,16 +35,17 @@
                     <Entry x:Name="UsuarioNuevo" Style="{StaticResource Campo}" Placeholder="Ej. admin" ReturnType="Next" />
 
                     <Label Text="Contraseña (mínimo 6 caracteres)" Style="{StaticResource Etiqueta}" />
-                    <Entry x:Name="Clave" Style="{StaticResource Campo}" Placeholder="Contraseña" IsPassword="True" ReturnType="Next" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                        <Entry x:Name="Clave" Style="{StaticResource Campo}" Placeholder="Contraseña" IsPassword="True" ReturnType="Next" />
+                        <Button x:Name="VerClave" Grid.Column="1" BackgroundColor="Transparent" WidthRequest="48" HeightRequest="56" Padding="0" />
+                    </Grid>
 
                     <Label Text="Confirmar contraseña" Style="{StaticResource Etiqueta}" />
-                    <Entry x:Name="Confirmar" Style="{StaticResource Campo}" Placeholder="Repite la contraseña"
-                           IsPassword="True" ReturnType="Done" Completed="OnCrear" />
-
-                    <HorizontalStackLayout Spacing="12">
-                        <CheckBox CheckedChanged="OnMostrarChanged" Color="{StaticResource Primary}" />
-                        <Label Text="Mostrar contraseñas" VerticalTextAlignment="Center" />
-                    </HorizontalStackLayout>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                        <Entry x:Name="Confirmar" Style="{StaticResource Campo}" Placeholder="Repite la contraseña"
+                               IsPassword="True" ReturnType="Done" Completed="OnCrear" />
+                        <Button x:Name="VerConfirmar" Grid.Column="1" BackgroundColor="Transparent" WidthRequest="48" HeightRequest="56" Padding="0" />
+                    </Grid>
 
                     <Label x:Name="Error" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
 

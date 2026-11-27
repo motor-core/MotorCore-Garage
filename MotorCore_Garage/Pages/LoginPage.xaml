@@ -10,48 +10,105 @@
     <ScrollView>
         <VerticalStackLayout Spacing="0">
 
-            <VerticalStackLayout Style="{StaticResource Hero}" Padding="24,56,24,24">
-                <Image x:Name="Logo" Source="logo.svg" HeightRequest="72" WidthRequest="72" HorizontalOptions="Start" Margin="0,0,0,12" />
-                <Label x:Name="Encabezado" Text="MotorCode Garage" Style="{StaticResource HeroTitulo}" />
-                <Label Text="Inicia sesión para continuar" Style="{StaticResource HeroSubtitulo}" />
-            </VerticalStackLayout>
+            <Grid BackgroundColor="{StaticResource Graphite}" HeightRequest="140" Padding="20,0" ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                <Image x:Name="Logo" Source="logo.svg" HeightRequest="48" WidthRequest="48" VerticalOptions="Center" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                    <Label x:Name="Encabezado" Text="Motor Core" Style="{StaticResource HeroTitulo}" FontSize="22" />
+                    <Label Text="Inicia sesión o crea tu cuenta" Style="{StaticResource HeroSubtitulo}" FontSize="14" />
+                </VerticalStackLayout>
+            </Grid>
 
-            <Border Style="{StaticResource Tarjeta}" Margin="16,20,16,24" Padding="20">
-                <VerticalStackLayout Spacing="12">
+            <Border Style="{StaticResource Tarjeta}" Margin="16,20,16,24" Padding="0">
+                <VerticalStackLayout Spacing="0">
 
-                    <!-- Tipo de acceso: monitoreo del taller o cliente -->
-                    <Label Text="Entrar como" Style="{StaticResource Etiqueta}" />
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                        <Button x:Name="BotonModoMonitor" Text="Monitor" HeightRequest="48" FontSize="14" Clicked="OnModoMonitor" />
-                        <Button x:Name="BotonModoCliente" Grid.Column="1" Text="Cliente" HeightRequest="48" FontSize="14" Clicked="OnModoCliente" />
-                    </Grid>
-                    <Label x:Name="AyudaModo" Style="{StaticResource Pie}" />
+                    <VerticalStackLayout Spacing="12" Padding="20">
 
-                    <Label Text="Usuario" Style="{StaticResource Etiqueta}" />
-                    <Entry x:Name="Usuario" Style="{StaticResource Campo}" Placeholder="Tu usuario" ReturnType="Next" />
+                    <!-- Interruptor Entrar / Registrarse -->
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"
+                            StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="3" HorizontalOptions="Center" WidthRequest="260">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="3">
+                            <Border x:Name="OpcionEntrar" Padding="0,6" StrokeThickness="0" StrokeShape="RoundRectangle 15">
+                                <Label Text="Entrar" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnVerEntrar" /></Border.GestureRecognizers>
+                            </Border>
+                            <Border x:Name="OpcionRegistrar" Grid.Column="1" Padding="0,6" StrokeThickness="0" StrokeShape="RoundRectangle 15">
+                                <Label Text="Registrarse" FontSize="14" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnVerRegistro" /></Border.GestureRecognizers>
+                            </Border>
+                        </Grid>
+                    </Border>
 
-                    <Label Text="Contraseña" Style="{StaticResource Etiqueta}" />
-                    <Entry x:Name="Contrasena" Style="{StaticResource Campo}" Placeholder="Tu contraseña"
-                           IsPassword="True" ReturnType="Done" Completed="OnEntrar" />
+                    <!-- Selector: entrar a una cuenta existente o registrarse como cliente -->
 
-                    <HorizontalStackLayout Spacing="12">
-                        <CheckBox CheckedChanged="OnMostrarChanged" Color="{StaticResource Primary}" />
-                        <Label Text="Mostrar contraseña" VerticalTextAlignment="Center" />
-                    </HorizontalStackLayout>
+                    <!-- Entrar: monitoreo o cliente -->
+                    <VerticalStackLayout x:Name="PanelEntrar" Spacing="12">
+
+                        <Label Text="Usuario" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Usuario" Style="{StaticResource Campo}" Placeholder="Tu usuario" ReturnType="Next" />
+
+                        <Label Text="Contraseña" Style="{StaticResource Etiqueta}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Entry x:Name="Contrasena" Style="{StaticResource Campo}" Placeholder="Tu contraseña"
+                                   IsPassword="True" ReturnType="Done" Completed="OnEntrar" />
+                            <Button x:Name="VerContrasena" Grid.Column="1" BackgroundColor="Transparent" WidthRequest="48" HeightRequest="56" Padding="0" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+
+                    <!-- Registrarse: cliente nuevo; el sistema crea el cliente y su usuario -->
+                    <VerticalStackLayout x:Name="PanelRegistro" Spacing="12" IsVisible="False">
+                        <Label Text="Tu nombre completo" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="NombreCliente" Style="{StaticResource Campo}" Placeholder="Ej. Jorge Ramírez López" ReturnType="Next" />
+
+                        <Label Text="Teléfono (10 dígitos)" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="Telefono" Style="{StaticResource Campo}" Placeholder="5512345678" Keyboard="Telephone" MaxLength="10" ReturnType="Next" />
+
+                        <Label Text="Usuario" Style="{StaticResource Etiqueta}" />
+                        <Entry x:Name="UsuarioNuevo" Style="{StaticResource Campo}" Placeholder="Ej. jramirez" MaxLength="50" ReturnType="Next" />
+
+                        <Label Text="Contraseña (mínimo 6 caracteres)" Style="{StaticResource Etiqueta}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Entry x:Name="ClaveNueva" Style="{StaticResource Campo}" Placeholder="Contraseña" IsPassword="True" ReturnType="Next" />
+                            <Button x:Name="VerClaveNueva" Grid.Column="1" BackgroundColor="Transparent" WidthRequest="48" HeightRequest="56" Padding="0" />
+                        </Grid>
+
+                        <Label Text="Confirmar contraseña" Style="{StaticResource Etiqueta}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="4">
+                            <Entry x:Name="ConfirmarNueva" Style="{StaticResource Campo}" Placeholder="Repite la contraseña"
+                                   IsPassword="True" ReturnType="Done" Completed="OnRegistrar" />
+                            <Button x:Name="VerConfirmarNueva" Grid.Column="1" BackgroundColor="Transparent" WidthRequest="48" HeightRequest="56" Padding="0" />
+                        </Grid>
+
+                        <Button Text="Crear cuenta y entrar" Style="{StaticResource BotonPrimario}" Clicked="OnRegistrar" Margin="0,4,0,0" />
+                    </VerticalStackLayout>
+
+                    <!-- Opciones de entrada: tipo de acceso y botón Entrar (solo en modo Entrar) -->
+                    <VerticalStackLayout x:Name="PanelOpcionesEntrar" Spacing="12">
+                            <Label Text="Entrar como" Style="{StaticResource Etiqueta}" />
+                            <!-- Interruptor de tipo de acceso: Monitor / Cliente -->
+                            <Border BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 24" Padding="4">
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="4">
+                                    <Border x:Name="OpcionMonitor" Padding="0,11" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                                        <Label Text="Monitor" FontSize="15" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnModoMonitor" /></Border.GestureRecognizers>
+                                    </Border>
+                                    <Border x:Name="OpcionCliente" Grid.Column="1" Padding="0,11" StrokeThickness="0" StrokeShape="RoundRectangle 20">
+                                        <Label Text="Cliente" FontSize="15" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
+                                        <Border.GestureRecognizers><TapGestureRecognizer Tapped="OnModoCliente" /></Border.GestureRecognizers>
+                                    </Border>
+                                </Grid>
+                            </Border>
+                            <Label x:Name="AyudaModo" Style="{StaticResource Pie}" />
+                            <Button Text="Entrar" Style="{StaticResource BotonPrimario}" Clicked="OnEntrar" Margin="0,4,0,0" />
+                    </VerticalStackLayout>
 
                     <Label x:Name="Error" TextColor="{StaticResource WearDue}" FontSize="14" IsVisible="False" />
-
-                    <Button Text="Entrar" Style="{StaticResource BotonPrimario}" Clicked="OnEntrar" Margin="0,4,0,0" />
-
-                    <!-- Solo en modo cliente: el taller ya te registró y ahora creas tu acceso -->
-                    <VerticalStackLayout x:Name="SeccionCuentaCliente" Spacing="8" IsVisible="False" Margin="0,8,0,0">
-                        <Label Text="¿Aún no tienes cuenta de cliente?" Style="{StaticResource Pie}" HorizontalTextAlignment="Center" />
-                        <Button Text="Crear mi cuenta" Style="{StaticResource BotonSecundario}" Clicked="OnCrearCuenta" />
-                    </VerticalStackLayout>
 
                     <Label Text="¿Quieres una cita?" Style="{StaticResource Pie}" HorizontalTextAlignment="Center" Margin="0,8,0,0" />
                     <Button Text="Agendar cita por WhatsApp" Style="{StaticResource BotonSecundario}" Clicked="OnAgendarWhatsApp"
                             ImageSource="{fab:FontAwesomeBrand Icon=Whatsapp, IconColor=#E8701A, IconSize=20}" />
+                </VerticalStackLayout>
                 </VerticalStackLayout>
             </Border>
 

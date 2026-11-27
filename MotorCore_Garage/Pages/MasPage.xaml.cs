@@ -21,12 +21,13 @@ namespace MotorCore_Garage.Pages
             BotonReportes.IsVisible = admin;
             BotonMecanico.IsVisible = admin;
             AyudaEquipo.Text = admin
-                ? "Toca un mecánico para eliminar su cuenta."
-                : "Solo el administrador puede agregar o eliminar cuentas.";
+                ? "Toca un mecánico para editar o eliminar su cuenta."
+                : "Solo el administrador puede agregar, editar o eliminar cuentas.";
 
             MostrarBahias();
             BotonMenosBahias.IsEnabled = admin;
             BotonMasBahias.IsEnabled = admin;
+            MostrarWhatsApp(admin);
 
             MostrarEquipo();
 
@@ -69,22 +70,49 @@ namespace MotorCore_Garage.Pages
 
                 if (admin && !esAdmin)
                 {
-                    var cuentaAEliminar = cuenta;
-                    fila.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(async () => await EliminarMecanico(cuentaAEliminar)) });
+                    var cuentaElegida = cuenta;
+                    fila.GestureRecognizers.Add(new TapGestureRecognizer { Command = new Command(async () => await OpcionesMecanico(cuentaElegida)) });
                 }
                 Equipo.Children.Add(fila);
             }
         }
 
+        async Task OpcionesMecanico(Models.Usuario cuenta)
+        {
+            var opcion = await ModalPage.Opcion(this, cuenta.Username, "Editar", "Eliminar");
+            if (opcion == "Editar") await EditarMecanico(cuenta);
+            else if (opcion == "Eliminar") await EliminarMecanico(cuenta);
+        }
+
+        // Cambia el usuario y, si se escribe, la contraseña. Dejar la contraseña vacía conserva la actual.
+        async Task EditarMecanico(Models.Usuario cuenta)
+        {
+            var usuario = await ModalPage.Pedir(this, "Editar mecánico", "Usuario para iniciar sesión", "Siguiente", "Cancelar",
+                placeholder: "Ej. mramirez", valorInicial: cuenta.Username, maxLength: 50);
+            if (string.IsNullOrWhiteSpace(usuario)) return;
+
+            var clave = await ModalPage.Pedir(this, "Editar mecánico", "Nueva contraseña (vacía para no cambiarla)", "Guardar", "Cancelar", maxLength: 50, esClave: true);
+            if (clave is null) return;
+
+            var error = Taller.EditarCuentaMecanico(cuenta, usuario, string.IsNullOrEmpty(clave) ? null : clave);
+            if (error is not null)
+            {
+                await ModalPage.Aviso(this, "No se pudo guardar", error);
+                return;
+            }
+            MostrarEquipo();
+            await ModalPage.Aviso(this, "Cuenta actualizada", $"«{cuenta.Username}» ya tiene sus datos actualizados.");
+        }
+
         async Task EliminarMecanico(Models.Usuario cuenta)
         {
-            var confirmar = await DisplayAlertAsync("Eliminar mecánico", $"¿Eliminar la cuenta «{cuenta.Username}»? Ya no podrá iniciar sesión.", "Eliminar", "Cancelar");
+            var confirmar = await ModalPage.Confirmar(this, "Eliminar mecánico", $"¿Eliminar la cuenta «{cuenta.Username}»? Ya no podrá iniciar sesión.", "Eliminar", "Cancelar");
             if (!confirmar) return;
 
             var error = Taller.EliminarCuentaMecanico(cuenta);
             if (error is not null)
             {
-                await DisplayAlertAsync("No se pudo eliminar", error, "OK");
+                await ModalPage.Aviso(this, "No se pudo eliminar", error);
                 return;
             }
             MostrarEquipo();
@@ -92,22 +120,22 @@ namespace MotorCore_Garage.Pages
 
         async void OnAgregarMecanico(object? sender, EventArgs e)
         {
-            var usuario = await DisplayPromptAsync("Nuevo mecánico", "Usuario para iniciar sesión", "Siguiente", "Cancelar",
+            var usuario = await ModalPage.Pedir(this, "Nuevo mecánico", "Usuario para iniciar sesión", "Siguiente", "Cancelar",
                 placeholder: "Ej. mramirez", maxLength: 50);
             if (string.IsNullOrWhiteSpace(usuario)) return;
 
-            var clave = await DisplayPromptAsync("Nuevo mecánico", "Contraseña (mínimo 6 caracteres)", "Crear cuenta", "Cancelar", maxLength: 50);
+            var clave = await ModalPage.Pedir(this, "Nuevo mecánico", "Contraseña (mínimo 6 caracteres)", "Crear cuenta", "Cancelar", maxLength: 50, esClave: true);
             if (string.IsNullOrWhiteSpace(clave)) return;
 
             var error = await Taller.CrearCuentaMecanicoAsync(usuario, clave);
             if (error is not null)
             {
-                await DisplayAlertAsync("No se pudo crear la cuenta", error, "OK");
+                await ModalPage.Aviso(this, "No se pudo crear la cuenta", error);
                 return;
             }
 
             MostrarEquipo();
-            await DisplayAlertAsync("Cuenta creada", $"«{usuario.Trim().ToLowerInvariant()}» ya puede iniciar sesión como mecánico.", "OK");
+            await ModalPage.Aviso(this, "Cuenta creada", $"«{usuario.Trim().ToLowerInvariant()}» ya puede iniciar sesión como mecánico.");
         }
 
         void GuardarIntervalo(ComponenteDef c, Entry entrada)
@@ -121,6 +149,30 @@ namespace MotorCore_Garage.Pages
             {
                 entrada.Text = c.IntervaloKm.ToString();
             }
+        }
+
+        // Muestra el número sin la lada 52, como lo escribe la persona.
+        void MostrarWhatsApp(bool admin)
+        {
+            var numero = Taller.WhatsAppEmpresa;
+            NumeroWhatsApp.Text = numero.StartsWith("52") ? numero[2..] : numero;
+            NumeroWhatsApp.IsEnabled = admin;
+            BotonGuardarWhatsApp.IsVisible = admin;
+            AyudaWhatsApp.Text = admin
+                ? "Las citas que pidan los clientes llegarán a este número."
+                : "Solo el administrador puede cambiar este número.";
+        }
+
+        async void OnGuardarWhatsApp(object? sender, EventArgs e)
+        {
+            var error = Taller.GuardarWhatsApp(NumeroWhatsApp.Text ?? "");
+            if (error is not null)
+            {
+                await ModalPage.Aviso(this, "No se pudo guardar", error);
+                return;
+            }
+            MostrarWhatsApp(true);
+            await ModalPage.Aviso(this, "Número actualizado", "Las citas se enviarán al nuevo número.");
         }
 
         void MostrarBahias()
@@ -159,12 +211,12 @@ namespace MotorCore_Garage.Pages
             };
             await File.WriteAllTextAsync(ruta, JsonSerializer.Serialize(datos, new JsonSerializerOptions { WriteIndented = true }));
             Taller.Bitacorar("creó un respaldo");
-            await DisplayAlertAsync("Respaldo listo", $"Se guardó en:\n{ruta}", "Entendido");
+            await ModalPage.Aviso(this, "Respaldo listo", $"Se guardó en:\n{ruta}", "Entendido");
         }
 
         async void OnCerrarSesion(object? sender, EventArgs e)
         {
-            var confirmar = await DisplayAlertAsync("Cerrar sesión", "¿Seguro que quieres salir?", "Salir", "Cancelar");
+            var confirmar = await ModalPage.Confirmar(this, "Cerrar sesión", "¿Seguro que quieres salir?", "Salir", "Cancelar");
             if (!confirmar) return;
             Taller.CerrarSesion();
             Application.Current!.Windows[0].Page = new NavigationPage(new LoginPage());

@@ -12,7 +12,8 @@ namespace MotorCore_Garage.Pages
         public RegistroPage()
         {
             InitializeComponent();
-            Logo.Drawable = new LogotipoDrawable();
+            Ui.ConectarVerClave(Clave, VerClave);
+            Ui.ConectarVerClave(Confirmar, VerConfirmar);
 
             _hayCuentas = Taller.HayCuentas();
             _clientes = Taller.Clientes.Where(c => !Taller.TieneAcceso(c.Id)).ToList();
@@ -33,10 +34,9 @@ namespace MotorCore_Garage.Pages
             _cliente = cliente;
             Ui.EstiloSeleccion(BotonModoMonitor, !cliente);
             Ui.EstiloSeleccion(BotonModoCliente, cliente);
-            CampoTaller.IsVisible = !cliente;
             CampoCliente.IsVisible = cliente;
 
-            Titulo.Text = cliente ? "Crea tu cuenta" : "Registra tu taller";
+            Titulo.Text = cliente ? "Crea tu cuenta" : "Registra el taller";
             Subtitulo.Text = cliente ? "Elige tu nombre y crea tu usuario" : "Primer uso: crea la cuenta de administrador";
             BotonCrear.Text = cliente ? "Crear cuenta y entrar" : "Crear taller y entrar";
 
@@ -48,15 +48,9 @@ namespace MotorCore_Garage.Pages
             Error.IsVisible = false;
         }
 
-        void OnMostrarChanged(object? sender, CheckedChangedEventArgs e)
-        {
-            Clave.IsPassword = !e.Value;
-            Confirmar.IsPassword = !e.Value;
-        }
 
-        void OnCrear(object? sender, EventArgs e)
+        async void OnCrear(object? sender, EventArgs e)
         {
-            var taller = NombreTaller.Text?.Trim() ?? "";
             var usuario = UsuarioNuevo.Text?.Trim() ?? "";
             var clave = Clave.Text ?? "";
             var confirmar = Confirmar.Text ?? "";
@@ -64,7 +58,6 @@ namespace MotorCore_Garage.Pages
 
             var error =
                 _cliente && (indice < 0 || indice >= _clientes.Count) ? "Elige tu nombre en la lista"
-                : !_cliente && taller.Length == 0 ? "Escribe el nombre del taller"
                 : usuario.Length < 3 ? "El usuario debe tener al menos 3 caracteres"
                 : !usuario.All(ch => char.IsLetterOrDigit(ch) || ch is '.' or '_' or '-') ? "El usuario solo puede tener letras, números, punto, guion o guion bajo"
                 : clave.Length < 6 ? "La contraseña debe tener al menos 6 caracteres"
@@ -79,7 +72,7 @@ namespace MotorCore_Garage.Pages
 
             var fallo = _cliente
                 ? Taller.CrearAccesoCliente(_clientes[indice].Id, usuario, clave)
-                : Taller.CrearCuentaInicial(taller, usuario, clave);
+                : await Taller.CrearCuentaInicial(usuario, clave);
             if (fallo is not null)
             {
                 Mostrar(fallo);
@@ -96,6 +89,11 @@ namespace MotorCore_Garage.Pages
                     return;
                 }
             }
+
+            // Solo se avisa cuando el correo del administrador ya estaba en Firebase.
+            if (!_cliente && Taller.CorreoYaRegistrado)
+                await ModalPage.Aviso(this, "Ya tenías cuenta",
+                    "Ese usuario ya tiene una cuenta en Firebase, así que no se creó una nueva. Con conexión, entra con la contraseña de esa cuenta.");
 
             Navegacion.IrAlInicio();
         }
