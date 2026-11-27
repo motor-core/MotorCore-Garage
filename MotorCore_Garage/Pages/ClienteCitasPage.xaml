@@ -15,7 +15,9 @@
             </VerticalStackLayout>
 
             <VerticalStackLayout Padding="16,20,16,32" Spacing="20">
-                <Button Text="Agendar cita por WhatsApp" Style="{StaticResource BotonPrimario}" Clicked="OnAgendar"
+                <Button Text="Solicitar cita" Style="{StaticResource BotonPrimario}" Clicked="OnSolicitar"
+                        ImageSource="{mi:Material Icon=EventAvailable, IconColor=White, IconSize=20}" />
+                <Button Text="Agendar cita por WhatsApp" Style="{StaticResource BotonSecundario}" Clicked="OnAgendar"
                         ImageSource="{fab:FontAwesomeBrand Icon=Whatsapp, IconColor=White, IconSize=20}" />
 
                 <VerticalStackLayout Spacing="12">

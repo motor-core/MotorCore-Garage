@@ -5,7 +5,7 @@ namespace MotorCore_Garage.Pages
 {
     public partial class NuevaCitaPage : ContentPage
     {
-        static readonly string[] TiposServicio =
+        public static readonly string[] TiposServicio =
         {
             "Cambio de aceite", "Afinación mayor", "Revisión de frenos",
             "Cambio de llantas", "Revisión general", "Cambio de batería", "Suspensión"
@@ -50,19 +50,21 @@ namespace MotorCore_Garage.Pages
                 var hora = Taller.Horarios[i];
                 var boton = _botonesHora[i];
                 var lleno = Taller.HorarioLleno(FechaSel, hora);
-                boton.IsEnabled = !lleno;
-                var seleccionado = hora == _hora && !lleno;
+                var pasado = Taller.ErrorCita(FechaSel.AddHours(int.Parse(hora[..2]))) is not null && !lleno;
+                var noDisponible = lleno || pasado;
+                boton.IsEnabled = !noDisponible;
+                var seleccionado = hora == _hora && !noDisponible;
                 boton.BackgroundColor = seleccionado ? Ui.Recurso("Primary") : Ui.Recurso("Card");
-                boton.TextColor = seleccionado ? Ui.Recurso("White") : lleno ? Ui.Recurso("InkMuted") : Ui.Recurso("Ink");
+                boton.TextColor = seleccionado ? Ui.Recurso("White") : noDisponible ? Ui.Recurso("InkMuted") : Ui.Recurso("Ink");
                 boton.BorderColor = Ui.Recurso("Outline");
                 boton.BorderWidth = 1;
-                boton.Text = lleno ? $"{hora}\nLleno" : hora;
+                boton.Text = lleno ? $"{hora}\nLleno" : pasado ? $"{hora}\nPasado" : hora;
             }
         }
 
         void OnFecha(object? sender, DateChangedEventArgs e)
         {
-            if (_hora is not null && Taller.HorarioLleno(FechaSel, _hora)) _hora = null;
+            if (_hora is not null && Taller.ErrorCita(FechaSel.AddHours(int.Parse(_hora[..2]))) is not null) _hora = null;
             ActualizarHorarios();
         }
 
@@ -89,7 +91,7 @@ namespace MotorCore_Garage.Pages
             var inicio = FechaSel.AddHours(int.Parse(_hora![..2]));
             var prioridad = (Prioridad)Prioridad.SelectedIndex;
 
-            Taller.AgregarCita(new Cita
+            var error = Taller.AgregarCita(new Cita
             {
                 Fecha = inicio,
                 ClienteId = cliente.Id,
@@ -97,6 +99,11 @@ namespace MotorCore_Garage.Pages
                 Servicio = TiposServicio[Servicio.SelectedIndex],
                 Prioridad = prioridad
             });
+            if (error is not null)
+            {
+                Validar(ErrorHora, true, error);
+                return;
+            }
             Taller.Bitacorar($"agendó cita de {TiposServicio[Servicio.SelectedIndex]} para {vehiculo.Placa}");
 
             await Ui.Snackbar(Snack, SnackTexto, "Cita guardada", 1200);

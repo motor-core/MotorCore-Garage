@@ -99,13 +99,13 @@ namespace MotorCore_Garage.Pages
                 fila.Add(new Label { Text = hora, Style = (Style)Application.Current!.Resources["CuerpoStrong"], Margin = new Thickness(0, 12, 0, 0) });
 
                 var contenido = new VerticalStackLayout { Spacing = 8 };
-                var citas = Taller.Citas.Where(c => c.Fecha.Date == _dia.Date && c.Fecha.Hour == h).OrderBy(c => c.Fecha).ToList();
+                var citas = Taller.Citas.Where(c => c.Fecha.Date == _dia.Date && c.Fecha.Hour == h && c.Estado != "Cancelada").OrderBy(c => c.Fecha).ToList();
                 if (citas.Count == 0)
                 {
                     contenido.Add(new Label { Text = "Libre", Style = (Style)Application.Current!.Resources["Pie"], Margin = new Thickness(0, 12, 0, 0) });
                 }
                 foreach (var c in citas)
-                    contenido.Add(Vistas.CitaCard(c, () => Shell.Current.GoToAsync("recepcion")));
+                    contenido.Add(Vistas.CitaCard(c, () => AlTocarCita(c)));
 
                 var lleno = Taller.HorarioLleno(_dia, hora);
                 if (lleno && citas.Count > 0)
@@ -114,6 +114,29 @@ namespace MotorCore_Garage.Pages
                 fila.Add(contenido, 1, 0);
                 Bloques.Children.Add(fila);
             }
+        }
+
+        // Una solicitud del cliente se confirma o rechaza aquí; cualquier otra cita abre la recepción.
+        async void AlTocarCita(Cita cita)
+        {
+            if (cita.Estado != "Solicitada")
+            {
+                await Shell.Current.GoToAsync("recepcion");
+                return;
+            }
+
+            var opcion = await ModalPage.Opcion(this, "Solicitud de cita", "Confirmar", "Rechazar");
+            string? error = null;
+            if (opcion == "Confirmar") error = Taller.ConfirmarCita(cita);
+            else if (opcion == "Rechazar") error = Taller.CancelarCita(cita);
+            else return;
+
+            if (error is not null)
+            {
+                await ModalPage.Aviso(this, "No se pudo completar", error);
+                return;
+            }
+            Refrescar();
         }
 
         async void OnNuevaCita(object? sender, EventArgs e)

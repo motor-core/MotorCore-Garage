@@ -48,6 +48,10 @@ namespace MotorCore_Garage.Pages
             textos.Add(new Label { Text = cliente?.Nombre ?? "", Style = Estilo("CuerpoStrong") });
             textos.Add(new Label { Text = vehiculo is null ? "" : $"{vehiculo.Titulo} · {vehiculo.Placa}", Style = Estilo("Pie") });
             textos.Add(new Label { Text = c.Servicio, Style = Estilo("Cuerpo"), FontSize = 14 });
+            if (c.Estado == "Cancelada")
+                textos.Add(new Label { Text = "Cancelada", Style = Estilo("Pie"), TextColor = Ui.Recurso("WearDue") });
+            else if (c.Estado == "Solicitada")
+                textos.Add(new Label { Text = "Pendiente de confirmación", Style = Estilo("Pie"), TextColor = Ui.Recurso("WearSoon") });
             fila.Add(textos, 1, 0);
             fila.Add(Ui.ChipPrioridad(c.Prioridad), 2, 0);
             return Tarjeta(fila, alTocar);
@@ -149,14 +153,36 @@ namespace MotorCore_Garage.Pages
         public static async Task<bool> AgendarCitaWhatsApp()
         {
             if (string.IsNullOrWhiteSpace(Taller.WhatsAppEmpresa)) return false;
-            var texto = Uri.EscapeDataString($"Hola, quiero agendar una cita en {Taller.NombreTaller}.");
+            var texto = Uri.EscapeDataString(MensajeCita());
             await Launcher.Default.OpenAsync($"https://wa.me/{Taller.WhatsAppEmpresa}?text={texto}");
             return true;
         }
 
+        // Mensaje para pedir cita. Si hay un cliente con sesión, incluye su nombre y su vehículo cuando tiene uno solo.
+        static string MensajeCita()
+        {
+            // Formato de WhatsApp: *texto* en negrita.
+            var lineas = new List<string> { "Hola, buen día. Quisiera agendar una cita de servicio en *Motor Core*." };
+
+            if (Taller.EsCliente && Taller.ClientePorId(Taller.ClienteActualId) is { } cliente)
+            {
+                var datos = new List<string> { $"*Cliente:* {cliente.Nombre}" };
+                var vehiculos = Taller.VehiculosDeCliente(cliente.Id).ToList();
+                if (vehiculos.Count == 1)
+                {
+                    datos.Add($"*Vehículo:* {vehiculos[0].Titulo}");
+                    datos.Add($"*Placa:* {vehiculos[0].Placa}");
+                }
+                lineas.Add(string.Join("\n", datos));
+            }
+
+            lineas.Add("¿Me compartes los horarios disponibles? Gracias.");
+            return string.Join("\n\n", lineas);
+        }
+
         public static async Task Contactar(Page pagina, Cliente c)
         {
-            var opcion = await pagina.DisplayActionSheetAsync($"Contactar a {c.Nombre}", "Cancelar", null, "Llamar", "WhatsApp");
+            var opcion = await ModalPage.Opcion(pagina, $"Contactar a {c.Nombre}", "Llamar", "WhatsApp");
             if (opcion == "Llamar") await Llamar(c);
             else if (opcion == "WhatsApp") await WhatsApp(c);
         }
