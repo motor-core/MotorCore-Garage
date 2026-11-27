@@ -6,8 +6,8 @@
              NavigationPage.HasNavigationBar="False">
 
     <VerticalStackLayout VerticalOptions="Center" HorizontalOptions="Center" Spacing="16">
-        <GraphicsView x:Name="Logo" WidthRequest="128" HeightRequest="128" />
-        <Label Text="MotorCode Garage" Style="{StaticResource Display}" HorizontalTextAlignment="Center" />
+        <Image x:Name="Logo" Source="logo.svg" WidthRequest="128" HeightRequest="128" />
+        <Label Text="Motor Core" Style="{StaticResource Display}" HorizontalTextAlignment="Center" />
         <Label Text="Taller mecánico · Modo local" FontSize="14"
                TextColor="{StaticResource InkDark}" HorizontalTextAlignment="Center" />
     </VerticalStackLayout>

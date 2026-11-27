@@ -13,7 +13,7 @@
                 <Image Source="logo.svg" HeightRequest="44" WidthRequest="44" VerticalOptions="Center" />
                 <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                     <Label x:Name="Fecha" Style="{StaticResource HeroSubtitulo}" FontSize="14" />
-                    <Label x:Name="Encabezado" Text="MotorCode Garage" Style="{StaticResource HeroTitulo}" FontSize="22" />
+                    <Label x:Name="Encabezado" Text="Taller Mecánico Sánchez" Style="{StaticResource HeroTitulo}" FontSize="22" />
                 </VerticalStackLayout>
             </Grid>
             <Label x:Name="Saludo" Style="{StaticResource HeroSubtitulo}" />
